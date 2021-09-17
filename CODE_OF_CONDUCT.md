@@ -3,7 +3,7 @@
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in pull-request-feedback-ml-analytics-tool project and our
+We as members, contributors, and leaders pledge to make participation in ml-conversational-analytic-tool project and our
 community a harassment-free experience for everyone, regardless of age, body
 size, visible or invisible disability, ethnicity, sex characteristics, gender
 identity and expression, level of experience, education, socio-economic status,

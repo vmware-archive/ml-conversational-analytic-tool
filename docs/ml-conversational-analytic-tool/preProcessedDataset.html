@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>ml-conversational-analytic-tool.preProcessedDataset API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ml-conversational-analytic-tool.preProcessedDataset</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright 2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+import ast
+
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+
+
+# Class to prepare dataset for machine learning tasks
+class PreProcessedDataset:
+    # Set flags and instance variables in constructor
+    def __init__(self, vocab_size=1000, no_tokens=512, max_pull_length=100):
+        self.annotated_data = None
+        self.dataset = None
+        self.full_dataset = None
+
+        self.vocab_size = vocab_size
+        self.no_tokens = no_tokens
+        self.max_pull_length = max_pull_length
+        self.curr_max_length = 0
+        self.codes = {}
+        self.decodes = {}
+        self.all_encoded_utterances = []
+        self.results = {&#39;Constructive&#39;: [], &#39;Inclusive&#39;: []}
+        self.all_users = []
+
+        self.annotated_data_open = False
+        self.dataset_open = False
+        self.full_dataset_ready = False
+        self.encode_ready = False
+
+    # Setup the preprocessed dataset
+    def setupPreProcess(self, annotated_filename, dataset_filename):
+        # Load datasets
+        self.loadAnnotatedData(annotated_filename)
+        self.loadDataset(dataset_filename)
+        self.full_dataset = pd.merge(self.annotated_data, self.dataset, how=&#39;left&#39;, on=&#39;Number&#39;, copy=True)
+        self.full_dataset = self.full_dataset[
+            [&#39;Number&#39;, &#39;Thread&#39;, &#39;Constructive&#39;, &#39;Inclusive&#39;, &#39;Title&#39;, &#39;User&#39;, &#39;Body&#39;, &#39;Comments&#39;, &#39;Review_Comments&#39;]]
+
+        def stringToDict(string):
+            string = ast.literal_eval(string)
+            for i in range(len(string)):
+                string[i] = ast.literal_eval(string[i])
+            return string
+
+        # Convert all json strings to dictionaries
+        self.full_dataset[&#39;Comments&#39;] = self.full_dataset[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
+        self.full_dataset[&#39;Review_Comments&#39;] = self.full_dataset[&#39;Review_Comments&#39;].apply(
+            lambda comment: stringToDict(comment))
+
+    # Encode all utterances
+    def encodeData(self):
+        all_utterances = self._getObsResUsers()
+        # Encode each utterance
+        for utterances in all_utterances:
+            self.all_encoded_utterances.append(self.encode(utterances))
+        # Cap pull length to max
+        drop_indexes = []
+        for i in range(len(self.all_encoded_utterances)):
+            if len(self.all_encoded_utterances[i]) &gt; 100:
+                drop_indexes.append(i)
+        drop_indexes.reverse()
+        for idx in drop_indexes:
+            self.all_encoded_utterances = self.all_encoded_utterances[:idx] + self.all_encoded_utterances[idx + 1:]
+            self.all_users = self.all_users[:idx] + self.all_users[idx + 1:]
+            self.results[&#39;Constructive&#39;] = self.results[&#39;Constructive&#39;][:idx] + self.results[&#39;Constructive&#39;][idx + 1:]
+            self.results[&#39;Inclusive&#39;] = self.results[&#39;Inclusive&#39;][:idx] + self.results[&#39;Inclusive&#39;][idx + 1:]
+        self.curr_max_length = max([len(x) for x in self.all_encoded_utterances])
+
+    # Get matrix observation and results for ML task soutcome = Inclusive, Constructive, or None -&gt; both 
+    def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+        obs = []
+        for i in range(len(self.all_encoded_utterances)):
+            def pad(inp):
+                padding = [0] * self.no_tokens
+                while len(inp) &lt; self.curr_max_length:
+                    inp = np.vstack([inp, padding.copy()])
+                return inp
+
+            # Pad to maximum pull length
+            if padPull:
+                obs.append(np.array(pad(self.all_encoded_utterances[i])))
+            else:
+                obs.append(tf.convert_to_tensor(np.array(self.all_encoded_utterances[i])))
+        res = self.getRes(outcome)
+        return obs, res
+
+    # Get stacked matrix observation and results for ML task 
+    def getRoleMatrix(self, outcome=None, padPull=True):
+        # Check if results must be padded to same length for each pull
+        if padPull:
+            # Author and reviwer layers
+            layer_writer = []
+            layer_reviewer = []
+            for i in range(len(self.all_encoded_utterances)):
+                writer_comments = []
+                reviewer_comments = []
+                writer = self.all_users[i][0]
+                for j in range(len(self.all_encoded_utterances[i])):
+                    # Check if author or reviewer
+                    if self.all_users[i][j] == writer:
+                        writer_comments.append(self.all_encoded_utterances[i][j])
+                        reviewer_comments.append(np.zeros(self.no_tokens))
+                    else:
+                        reviewer_comments.append(self.all_encoded_utterances[i][j])
+                        writer_comments.append(np.zeros(self.no_tokens))
+                    padding = [0] * self.no_tokens
+                    # Pad both reviewer and writer layers
+                    while len(writer_comments) &lt; self.curr_max_length:
+                        writer_comments.append(padding.copy())
+                        reviewer_comments.append(padding.copy())
+                    layer_writer.append(np.array(writer_comments))
+                    layer_reviewer.append(np.array(reviewer_comments))
+            # Stack reviwer and author matrices
+            obs = np.stack((layer_writer, layer_reviewer), axis=3)
+            res = self.getRes(outcome)
+            return obs, res
+        else:
+            obs = []
+            for i in range(len(self.all_encoded_utterances)):
+                writer_comments = []
+                reviewer_comments = []
+                writer = self.all_users[i][0]
+                for j in range(len(self.all_encoded_utterances[i])):
+                    if self.all_users[i][j] == writer:
+                        writer_comments.append(self.all_encoded_utterances[i][j])
+                        reviewer_comments.append(np.zeros(self.no_tokens))
+                    else:
+                        reviewer_comments.append(self.all_encoded_utterances[i][j])
+                        writer_comments.append(np.zeros(self.no_tokens))
+                # Stack individual layers since their lenghts are not equal
+                obs.append(tf.convert_to_tensor(np.stack((writer_comments, reviewer_comments), axis=2)))
+            res = self.getRes(outcome)
+            return obs, res
+
+    # Get list of results
+    def getRes(self, outcome=None):
+        if outcome:
+            return self.results[outcome]
+        return pd.DataFrame(data=self.results)
+
+    # Load annotated dataset from file
+    def loadAnnotatedData(self, filename):
+        self.annotated_data = pd.read_csv(filename)
+        self.annotated_data_open = True
+
+    # Load raw data from file
+    def loadDataset(self, filename):
+        self.dataset = pd.read_csv(filename)
+        self.dataset_open = True
+
+    # Encode an utterance through the lookup dictionary
+    def encode(self, utterances):
+        encoded_utterances = []
+        for utterance in utterances:
+            obs = []
+            words = utterance.split(&#34; &#34;)
+            for word in words:
+                obs.append(self.codes.get(word, 2))
+                # Truncate to 512 tokens
+                if len(obs) &gt; self.no_tokens - 1:
+                    break
+            # Indicate message end
+            if len(obs) &lt; self.no_tokens:
+                obs.append(1)
+            # Pad to 512 tokens
+            while len(obs) &lt; self.no_tokens:
+                obs.append(0)
+            encoded_utterances.append(np.array(obs))
+        return np.array(encoded_utterances)
+
+    # Setup the lookup dictionary through frequency encoding
+    def _setupEncode(self):
+        word_counts = {}
+        for index, row in self.annotated_data.iterrows():
+            words = row[&#39;Thread&#39;].split(&#34; &#34;)
+            for word in words:
+                if word in word_counts:
+                    word_counts[word] = word_counts[word] + 1
+                else:
+                    word_counts[word] = 1
+        # Sort the words to generate code
+        # Lower number : higher count
+        # 0 - Padding, 1 - End, 2 - Missing
+        # Only top 100 words
+        sorted_tuple_count = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
+        self.codes = {}
+        curr_id = 3
+        for tup in sorted_tuple_count:
+            self.codes[tup[0]] = curr_id
+            curr_id = curr_id + 1
+            if curr_id == self.vocab_size:
+                break
+        self.encode_ready = True
+
+    # Get all utterances by parsing dictionary for each pull
+    def _getObsResUsers(self):
+        all_utterances = []
+        for index, row in self.full_dataset.iterrows():
+            utterances = []
+            users = []
+            utterances.append(str(row[&#39;Title&#39;]) + &#34;\n&#34; + str(row[&#39;Body&#39;]))
+            users.append(row[&#39;User&#39;])
+            temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
+            temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
+            if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
+                all_comments = temp_df_comments.append(temp_df_review_comments)
+                all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
+                all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])
+                for comment_index, comment_row in all_comments.iterrows():
+                    utterances.append(comment_row[&#39;Body&#39;])
+                    users.append(comment_row[&#39;User&#39;])
+            all_utterances.append(utterances)
+            self.all_users.append(users)
+            self.results[&#39;Constructive&#39;].append(row[&#39;Constructive&#39;])
+            self.results[&#39;Inclusive&#39;].append(row[&#39;Inclusive&#39;])
+        return all_utterances</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset"><code class="flex name class">
+<span>class <span class="ident">PreProcessedDataset</span></span>
+<span>(</span><span>vocab_size=1000, no_tokens=512, max_pull_length=100)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PreProcessedDataset:
+    # Set flags and instance variables in constructor
+    def __init__(self, vocab_size=1000, no_tokens=512, max_pull_length=100):
+        self.annotated_data = None
+        self.dataset = None
+        self.full_dataset = None
+
+        self.vocab_size = vocab_size
+        self.no_tokens = no_tokens
+        self.max_pull_length = max_pull_length
+        self.curr_max_length = 0
+        self.codes = {}
+        self.decodes = {}
+        self.all_encoded_utterances = []
+        self.results = {&#39;Constructive&#39;: [], &#39;Inclusive&#39;: []}
+        self.all_users = []
+
+        self.annotated_data_open = False
+        self.dataset_open = False
+        self.full_dataset_ready = False
+        self.encode_ready = False
+
+    # Setup the preprocessed dataset
+    def setupPreProcess(self, annotated_filename, dataset_filename):
+        # Load datasets
+        self.loadAnnotatedData(annotated_filename)
+        self.loadDataset(dataset_filename)
+        self.full_dataset = pd.merge(self.annotated_data, self.dataset, how=&#39;left&#39;, on=&#39;Number&#39;, copy=True)
+        self.full_dataset = self.full_dataset[
+            [&#39;Number&#39;, &#39;Thread&#39;, &#39;Constructive&#39;, &#39;Inclusive&#39;, &#39;Title&#39;, &#39;User&#39;, &#39;Body&#39;, &#39;Comments&#39;, &#39;Review_Comments&#39;]]
+
+        def stringToDict(string):
+            string = ast.literal_eval(string)
+            for i in range(len(string)):
+                string[i] = ast.literal_eval(string[i])
+            return string
+
+        # Convert all json strings to dictionaries
+        self.full_dataset[&#39;Comments&#39;] = self.full_dataset[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
+        self.full_dataset[&#39;Review_Comments&#39;] = self.full_dataset[&#39;Review_Comments&#39;].apply(
+            lambda comment: stringToDict(comment))
+
+    # Encode all utterances
+    def encodeData(self):
+        all_utterances = self._getObsResUsers()
+        # Encode each utterance
+        for utterances in all_utterances:
+            self.all_encoded_utterances.append(self.encode(utterances))
+        # Cap pull length to max
+        drop_indexes = []
+        for i in range(len(self.all_encoded_utterances)):
+            if len(self.all_encoded_utterances[i]) &gt; 100:
+                drop_indexes.append(i)
+        drop_indexes.reverse()
+        for idx in drop_indexes:
+            self.all_encoded_utterances = self.all_encoded_utterances[:idx] + self.all_encoded_utterances[idx + 1:]
+            self.all_users = self.all_users[:idx] + self.all_users[idx + 1:]
+            self.results[&#39;Constructive&#39;] = self.results[&#39;Constructive&#39;][:idx] + self.results[&#39;Constructive&#39;][idx + 1:]
+            self.results[&#39;Inclusive&#39;] = self.results[&#39;Inclusive&#39;][:idx] + self.results[&#39;Inclusive&#39;][idx + 1:]
+        self.curr_max_length = max([len(x) for x in self.all_encoded_utterances])
+
+    # Get matrix observation and results for ML task soutcome = Inclusive, Constructive, or None -&gt; both 
+    def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+        obs = []
+        for i in range(len(self.all_encoded_utterances)):
+            def pad(inp):
+                padding = [0] * self.no_tokens
+                while len(inp) &lt; self.curr_max_length:
+                    inp = np.vstack([inp, padding.copy()])
+                return inp
+
+            # Pad to maximum pull length
+            if padPull:
+                obs.append(np.array(pad(self.all_encoded_utterances[i])))
+            else:
+                obs.append(tf.convert_to_tensor(np.array(self.all_encoded_utterances[i])))
+        res = self.getRes(outcome)
+        return obs, res
+
+    # Get stacked matrix observation and results for ML task 
+    def getRoleMatrix(self, outcome=None, padPull=True):
+        # Check if results must be padded to same length for each pull
+        if padPull:
+            # Author and reviwer layers
+            layer_writer = []
+            layer_reviewer = []
+            for i in range(len(self.all_encoded_utterances)):
+                writer_comments = []
+                reviewer_comments = []
+                writer = self.all_users[i][0]
+                for j in range(len(self.all_encoded_utterances[i])):
+                    # Check if author or reviewer
+                    if self.all_users[i][j] == writer:
+                        writer_comments.append(self.all_encoded_utterances[i][j])
+                        reviewer_comments.append(np.zeros(self.no_tokens))
+                    else:
+                        reviewer_comments.append(self.all_encoded_utterances[i][j])
+                        writer_comments.append(np.zeros(self.no_tokens))
+                    padding = [0] * self.no_tokens
+                    # Pad both reviewer and writer layers
+                    while len(writer_comments) &lt; self.curr_max_length:
+                        writer_comments.append(padding.copy())
+                        reviewer_comments.append(padding.copy())
+                    layer_writer.append(np.array(writer_comments))
+                    layer_reviewer.append(np.array(reviewer_comments))
+            # Stack reviwer and author matrices
+            obs = np.stack((layer_writer, layer_reviewer), axis=3)
+            res = self.getRes(outcome)
+            return obs, res
+        else:
+            obs = []
+            for i in range(len(self.all_encoded_utterances)):
+                writer_comments = []
+                reviewer_comments = []
+                writer = self.all_users[i][0]
+                for j in range(len(self.all_encoded_utterances[i])):
+                    if self.all_users[i][j] == writer:
+                        writer_comments.append(self.all_encoded_utterances[i][j])
+                        reviewer_comments.append(np.zeros(self.no_tokens))
+                    else:
+                        reviewer_comments.append(self.all_encoded_utterances[i][j])
+                        writer_comments.append(np.zeros(self.no_tokens))
+                # Stack individual layers since their lenghts are not equal
+                obs.append(tf.convert_to_tensor(np.stack((writer_comments, reviewer_comments), axis=2)))
+            res = self.getRes(outcome)
+            return obs, res
+
+    # Get list of results
+    def getRes(self, outcome=None):
+        if outcome:
+            return self.results[outcome]
+        return pd.DataFrame(data=self.results)
+
+    # Load annotated dataset from file
+    def loadAnnotatedData(self, filename):
+        self.annotated_data = pd.read_csv(filename)
+        self.annotated_data_open = True
+
+    # Load raw data from file
+    def loadDataset(self, filename):
+        self.dataset = pd.read_csv(filename)
+        self.dataset_open = True
+
+    # Encode an utterance through the lookup dictionary
+    def encode(self, utterances):
+        encoded_utterances = []
+        for utterance in utterances:
+            obs = []
+            words = utterance.split(&#34; &#34;)
+            for word in words:
+                obs.append(self.codes.get(word, 2))
+                # Truncate to 512 tokens
+                if len(obs) &gt; self.no_tokens - 1:
+                    break
+            # Indicate message end
+            if len(obs) &lt; self.no_tokens:
+                obs.append(1)
+            # Pad to 512 tokens
+            while len(obs) &lt; self.no_tokens:
+                obs.append(0)
+            encoded_utterances.append(np.array(obs))
+        return np.array(encoded_utterances)
+
+    # Setup the lookup dictionary through frequency encoding
+    def _setupEncode(self):
+        word_counts = {}
+        for index, row in self.annotated_data.iterrows():
+            words = row[&#39;Thread&#39;].split(&#34; &#34;)
+            for word in words:
+                if word in word_counts:
+                    word_counts[word] = word_counts[word] + 1
+                else:
+                    word_counts[word] = 1
+        # Sort the words to generate code
+        # Lower number : higher count
+        # 0 - Padding, 1 - End, 2 - Missing
+        # Only top 100 words
+        sorted_tuple_count = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
+        self.codes = {}
+        curr_id = 3
+        for tup in sorted_tuple_count:
+            self.codes[tup[0]] = curr_id
+            curr_id = curr_id + 1
+            if curr_id == self.vocab_size:
+                break
+        self.encode_ready = True
+
+    # Get all utterances by parsing dictionary for each pull
+    def _getObsResUsers(self):
+        all_utterances = []
+        for index, row in self.full_dataset.iterrows():
+            utterances = []
+            users = []
+            utterances.append(str(row[&#39;Title&#39;]) + &#34;\n&#34; + str(row[&#39;Body&#39;]))
+            users.append(row[&#39;User&#39;])
+            temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
+            temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
+            if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
+                all_comments = temp_df_comments.append(temp_df_review_comments)
+                all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
+                all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])
+                for comment_index, comment_row in all_comments.iterrows():
+                    utterances.append(comment_row[&#39;Body&#39;])
+                    users.append(comment_row[&#39;User&#39;])
+            all_utterances.append(utterances)
+            self.all_users.append(users)
+            self.results[&#39;Constructive&#39;].append(row[&#39;Constructive&#39;])
+            self.results[&#39;Inclusive&#39;].append(row[&#39;Inclusive&#39;])
+        return all_utterances</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, utterances)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode(self, utterances):
+    encoded_utterances = []
+    for utterance in utterances:
+        obs = []
+        words = utterance.split(&#34; &#34;)
+        for word in words:
+            obs.append(self.codes.get(word, 2))
+            # Truncate to 512 tokens
+            if len(obs) &gt; self.no_tokens - 1:
+                break
+        # Indicate message end
+        if len(obs) &lt; self.no_tokens:
+            obs.append(1)
+        # Pad to 512 tokens
+        while len(obs) &lt; self.no_tokens:
+            obs.append(0)
+        encoded_utterances.append(np.array(obs))
+    return np.array(encoded_utterances)</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encodeData"><code class="name flex">
+<span>def <span class="ident">encodeData</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encodeData(self):
+    all_utterances = self._getObsResUsers()
+    # Encode each utterance
+    for utterances in all_utterances:
+        self.all_encoded_utterances.append(self.encode(utterances))
+    # Cap pull length to max
+    drop_indexes = []
+    for i in range(len(self.all_encoded_utterances)):
+        if len(self.all_encoded_utterances[i]) &gt; 100:
+            drop_indexes.append(i)
+    drop_indexes.reverse()
+    for idx in drop_indexes:
+        self.all_encoded_utterances = self.all_encoded_utterances[:idx] + self.all_encoded_utterances[idx + 1:]
+        self.all_users = self.all_users[:idx] + self.all_users[idx + 1:]
+        self.results[&#39;Constructive&#39;] = self.results[&#39;Constructive&#39;][:idx] + self.results[&#39;Constructive&#39;][idx + 1:]
+        self.results[&#39;Inclusive&#39;] = self.results[&#39;Inclusive&#39;][:idx] + self.results[&#39;Inclusive&#39;][idx + 1:]
+    self.curr_max_length = max([len(x) for x in self.all_encoded_utterances])</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRes"><code class="name flex">
+<span>def <span class="ident">getRes</span></span>(<span>self, outcome=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getRes(self, outcome=None):
+    if outcome:
+        return self.results[outcome]
+    return pd.DataFrame(data=self.results)</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleAgnosticMatrix"><code class="name flex">
+<span>def <span class="ident">getRoleAgnosticMatrix</span></span>(<span>self, outcome=None, padPull=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+    obs = []
+    for i in range(len(self.all_encoded_utterances)):
+        def pad(inp):
+            padding = [0] * self.no_tokens
+            while len(inp) &lt; self.curr_max_length:
+                inp = np.vstack([inp, padding.copy()])
+            return inp
+
+        # Pad to maximum pull length
+        if padPull:
+            obs.append(np.array(pad(self.all_encoded_utterances[i])))
+        else:
+            obs.append(tf.convert_to_tensor(np.array(self.all_encoded_utterances[i])))
+    res = self.getRes(outcome)
+    return obs, res</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleMatrix"><code class="name flex">
+<span>def <span class="ident">getRoleMatrix</span></span>(<span>self, outcome=None, padPull=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getRoleMatrix(self, outcome=None, padPull=True):
+    # Check if results must be padded to same length for each pull
+    if padPull:
+        # Author and reviwer layers
+        layer_writer = []
+        layer_reviewer = []
+        for i in range(len(self.all_encoded_utterances)):
+            writer_comments = []
+            reviewer_comments = []
+            writer = self.all_users[i][0]
+            for j in range(len(self.all_encoded_utterances[i])):
+                # Check if author or reviewer
+                if self.all_users[i][j] == writer:
+                    writer_comments.append(self.all_encoded_utterances[i][j])
+                    reviewer_comments.append(np.zeros(self.no_tokens))
+                else:
+                    reviewer_comments.append(self.all_encoded_utterances[i][j])
+                    writer_comments.append(np.zeros(self.no_tokens))
+                padding = [0] * self.no_tokens
+                # Pad both reviewer and writer layers
+                while len(writer_comments) &lt; self.curr_max_length:
+                    writer_comments.append(padding.copy())
+                    reviewer_comments.append(padding.copy())
+                layer_writer.append(np.array(writer_comments))
+                layer_reviewer.append(np.array(reviewer_comments))
+        # Stack reviwer and author matrices
+        obs = np.stack((layer_writer, layer_reviewer), axis=3)
+        res = self.getRes(outcome)
+        return obs, res
+    else:
+        obs = []
+        for i in range(len(self.all_encoded_utterances)):
+            writer_comments = []
+            reviewer_comments = []
+            writer = self.all_users[i][0]
+            for j in range(len(self.all_encoded_utterances[i])):
+                if self.all_users[i][j] == writer:
+                    writer_comments.append(self.all_encoded_utterances[i][j])
+                    reviewer_comments.append(np.zeros(self.no_tokens))
+                else:
+                    reviewer_comments.append(self.all_encoded_utterances[i][j])
+                    writer_comments.append(np.zeros(self.no_tokens))
+            # Stack individual layers since their lenghts are not equal
+            obs.append(tf.convert_to_tensor(np.stack((writer_comments, reviewer_comments), axis=2)))
+        res = self.getRes(outcome)
+        return obs, res</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadAnnotatedData"><code class="name flex">
+<span>def <span class="ident">loadAnnotatedData</span></span>(<span>self, filename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loadAnnotatedData(self, filename):
+    self.annotated_data = pd.read_csv(filename)
+    self.annotated_data_open = True</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadDataset"><code class="name flex">
+<span>def <span class="ident">loadDataset</span></span>(<span>self, filename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loadDataset(self, filename):
+    self.dataset = pd.read_csv(filename)
+    self.dataset_open = True</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.setupPreProcess"><code class="name flex">
+<span>def <span class="ident">setupPreProcess</span></span>(<span>self, annotated_filename, dataset_filename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setupPreProcess(self, annotated_filename, dataset_filename):
+    # Load datasets
+    self.loadAnnotatedData(annotated_filename)
+    self.loadDataset(dataset_filename)
+    self.full_dataset = pd.merge(self.annotated_data, self.dataset, how=&#39;left&#39;, on=&#39;Number&#39;, copy=True)
+    self.full_dataset = self.full_dataset[
+        [&#39;Number&#39;, &#39;Thread&#39;, &#39;Constructive&#39;, &#39;Inclusive&#39;, &#39;Title&#39;, &#39;User&#39;, &#39;Body&#39;, &#39;Comments&#39;, &#39;Review_Comments&#39;]]
+
+    def stringToDict(string):
+        string = ast.literal_eval(string)
+        for i in range(len(string)):
+            string[i] = ast.literal_eval(string[i])
+        return string
+
+    # Convert all json strings to dictionaries
+    self.full_dataset[&#39;Comments&#39;] = self.full_dataset[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
+    self.full_dataset[&#39;Review_Comments&#39;] = self.full_dataset[&#39;Review_Comments&#39;].apply(
+        lambda comment: stringToDict(comment))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="ml-conversational-analytic-tool" href="index.html">ml-conversational-analytic-tool</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset">PreProcessedDataset</a></code></h4>
+<ul class="">
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encode" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encode">encode</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encodeData" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.encodeData">encodeData</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRes" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRes">getRes</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleAgnosticMatrix" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleAgnosticMatrix">getRoleAgnosticMatrix</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleMatrix" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.getRoleMatrix">getRoleMatrix</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadAnnotatedData" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadAnnotatedData">loadAnnotatedData</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadDataset" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.loadDataset">loadDataset</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.setupPreProcess" href="#ml-conversational-analytic-tool.preProcessedDataset.PreProcessedDataset.setupPreProcess">setupPreProcess</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
