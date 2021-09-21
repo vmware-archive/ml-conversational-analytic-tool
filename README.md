@@ -1,7 +1,9 @@
 # ML Conversational Analytic Tool
 
-The ML Conversational Analytic Tool is a machine learning framework to automatically assess pull request comments and
-reviews for constructive and inclusive communication.
+The ML Conversational Analytic Tool is a **proof of concept (POC)** machine learning framework to automatically assess
+pull request comments and reviews for constructive and inclusive communication.
+
+**This repo contains experimental code for discussion and collaboration and is not ready for production use.**
 
 ## Motivation
 
@@ -22,9 +24,9 @@ inclusive pull requests to foster a healthier open source community.
         - [Extract Raw Data from GitHub](#extract-raw-data-from-github)
         - [Annotate](#annotate)
     3. [Train models](#train-models)
-4. [Documentation]()
-5. [Contributing](#contributing)
-6. [License](#license)
+5. [Documentation](#documentation)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ## Build and Run
 
@@ -79,6 +81,11 @@ The libraries used within the project are available in the [requirements.txt](./
 `runDataExtraction.py` extracts raw data from GitHub based on parameters passed in by the user. To successfully run the
 script, a [GitHub access token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 is required and must be set as an environment variable.
+
+Note: There is a rate limit associated with GitHub API. Please read more about
+[GitHub API Rate Limits](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) for details
+before extracting data from a GitHub repo.
+
 ```
 GITACCESS=<YOUR_TOKEN>
 ```
@@ -105,11 +112,12 @@ python featureVector.py <rawdatafile> <words> -unannotated
 - (optional) `-unannotated` is an optional flag to generate data for annotation
 
 To annotate the raw data extracted we recommend using
-[Data Annotator For Machine Learning](https://github.com/vmware/data-annotator-for-machine-learning).
+[Data Annotator For Machine Learning](https://github.com/vmware/data-annotator-for-machine-learning). The quality of
+the data and the model very much depends on annotation best practices.
 
 ### Train models
 
-After both raw and annotated datasets are available, models can be trained to predict Constructiveness and Inclusiveness
+After both raw and annotated datasets are available, models can be trained to predict Constructiveness and Inclusiveness.
 
 There are two models available for training
 
@@ -127,16 +135,20 @@ python run.py <annotated_filename> <dataset_filename> <model> <outcome>
 - `model` is the type of model and can be 'LSTM' or 'CNN'
 - `outcome` can be 'Constructive', 'Inclusive' or 'Both'
 - (optional) `-roleRelevant` indicates that the encoding generated should be a stacked matrix representing user roles in
- conversation. If it is not set then a single matrix representing each comment/review without the role is generated.
+  conversation. If it is not set then a single matrix representing each comment/review without the role is generated.
 - (optional) `-pad` indicates that the number of comment/review should be padded to be a constant value. This argument
- is required to be set for `CNN` and not set for `LSTM`.
+  is required to be set for `CNN` and not set for `LSTM`.
 
 Both `BaseCNN` and `BaseLSTM` also have prediction explanation mechanisms that can be accessed through the
 `.explain(obs)` method in both classes.
 
+If you have ideas on how to improve the framework to assess text conversation for constructive and inclusive
+communication, we welcome your contributions!
+
 ## Documentation
-Auto-generated API documentation can be found in [docs/ml-conversational-analytic-tool](./docs/ml-conversational-analytic-tool)
-directory.
+
+Auto-generated API documentation can be found in
+[docs/ml-conversational-analytic-tool](./docs/ml-conversational-analytic-tool) directory.
 
 Run the following command to update the API documentation
 
@@ -146,10 +158,12 @@ PYTHONPATH=./ml-conversational-analytic-tool pdoc --html --output-dir docs ml-co
 
 ## Contributing
 
-The ml-conversational-analytic-tool project team welcomes contributions from the community. If you wish to
-contribute code and you have not signed our [contributor license agreement](https://cla.vmware.com/cla/1/preview), our
-bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to
+The ml-conversational-analytic-tool project team welcomes contributions from the community. If you wish to contribute
+code and you have not signed our [contributor license agreement](https://cla.vmware.com/cla/1/preview), our bot will
+update the issue when you open a Pull Request. For any questions about the CLA process, please refer to
 our [FAQ](https://cla.vmware.com/faq). For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Please remember to read our [Code of Conduct](CODE_OF_CONDUCT.md) and keep in mind during your collaboration.
 
 ## License
 
