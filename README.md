@@ -24,7 +24,8 @@ inclusive pull requests to foster a healthier open source community.
         - [Extract Raw Data from GitHub](#extract-raw-data-from-github)
         - [Annotate](#annotate)
     3. [Train models](#train-models)
-5. [Documentation](#documentation)
+4. [Documentation](#documentation)
+5. [Blog Posts](#blog-posts)
 6. [Contributing](#contributing)
 7. [License](#license)
 
@@ -155,6 +156,12 @@ Run the following command to update the API documentation
 ```python
 PYTHONPATH=./ml-conversational-analytic-tool pdoc --html --output-dir docs ml-conversational-analytic-tool
 ```
+
+## Blog Posts
+
+- [Measuring Constructiveness and Inclusivity in Open Source – Part 1](https://blogs.vmware.com/opensource/2021/09/17/measuring-constructiveness-and-inclusivity-in-open-source-part-1/)
+- [Coming Soon] Measuring Constructiveness and Inclusivity in Open Source – Part 2
+- [Coming soon] Measuring Constructiveness and Inclusivity in Open Source – Part 3
 
 ## Contributing
 
