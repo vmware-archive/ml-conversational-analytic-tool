@@ -160,8 +160,8 @@ PYTHONPATH=./ml-conversational-analytic-tool pdoc --html --output-dir docs ml-co
 ## Blog Posts
 
 - [Measuring Constructiveness and Inclusivity in Open Source – Part 1](https://blogs.vmware.com/opensource/2021/09/17/measuring-constructiveness-and-inclusivity-in-open-source-part-1/)
-- [Coming Soon] Measuring Constructiveness and Inclusivity in Open Source – Part 2
-- [Coming soon] Measuring Constructiveness and Inclusivity in Open Source – Part 3
+- [Measuring Constructiveness and Inclusivity in Open Source – Part 2](https://blogs.vmware.com/opensource/2021/10/06/measuring-constructiveness-and-inclusivity-in-open-source-part-2/)
+- [Measuring Constructiveness and Inclusivity in Open Source – Part 3](https://blogs.vmware.com/opensource/2021/10/14/measuring-constructiveness-and-inclusivity-in-open-source-part-3/)
 
 ## Contributing
 
