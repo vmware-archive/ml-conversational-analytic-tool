@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-
 from sklearn.model_selection import train_test_split
 
 from baseCNN import BaseCNN
@@ -16,20 +15,18 @@ def run(annotated_filename, dataset_filename, outcome, encoding_type, model_type
     data.setupPreProcess(annotated_filename, dataset_filename)
     data.encodeData()
 
+    # Create models
+    if model_type == 'LSTM':
+        model = BaseLSTM()
+    else:
+        model = BaseCNN()
+
     # Get data for training
     if encoding_type == 'role':
         obs, res = data.getRoleMatrix(outcome, padding)
-    elif encoding_type == 'role-agnostic':
-        obs, res = data.getRoleAgnosticMatrix(outcome, padding)
-
-    # Create models
-    if model_type == 'CNN':
-        model = BaseCNN()
-    elif model_type == 'LSTM':
-        model = BaseLSTM()
-    if encoding_type == 'role':
         model.makeModel2D(obs[0].shape)
-    elif encoding_type == 'role-agnostic':
+    else:
+        obs, res = data.getRoleAgnosticMatrix(outcome, padding)
         model.makeModel(obs[0].shape)
 
     # Train model
