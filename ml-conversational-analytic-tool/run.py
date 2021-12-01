@@ -51,6 +51,10 @@ if __name__ == "__main__":
     parser.add_argument('-pad', action='store_true', default=False, help='Pad total length of each pull')
 
     args = parser.parse_args()
+
+    if args.model != 'CNN' and args.model != 'LSTM':
+        raise Exception("Model must be either CNN or LSTM")
+
     encodingType = 'role'
     if not args.roleRelevant:
         encodingType = 'role-agnostic'
