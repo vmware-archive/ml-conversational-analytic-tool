@@ -163,6 +163,7 @@ class Featurizer:
         # Store each interaction and pull URL for export
         string_conversations = []
         pull_urls = []
+        pull_numbers = []
 
         for index, row in self.raw_data.iterrows():
             # Make pull message
@@ -181,9 +182,11 @@ class Featurizer:
                                                                           comment_row["Body"])
             string_conversations.append(conversation.encode("ascii", "ignore").decode())
             pull_urls.append(row["URL"])
+            pull_numbers.append(row["Number"])
 
         # Export converation field dataset
         export_df = pd.DataFrame()
+        export_df["Number"] = pull_numbers
         export_df["URL"] = pull_urls
         export_df["Thread"] = string_conversations
 
