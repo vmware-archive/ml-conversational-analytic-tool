@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-
 from sklearn.model_selection import train_test_split
 
 from baseCNN import BaseCNN
@@ -16,20 +15,18 @@ def run(annotated_filename, dataset_filename, outcome, encoding_type, model_type
     data.setupPreProcess(annotated_filename, dataset_filename)
     data.encodeData()
 
+    # Create models
+    if model_type == 'LSTM':
+        model = BaseLSTM()
+    else:
+        model = BaseCNN()
+
     # Get data for training
     if encoding_type == 'role':
         obs, res = data.getRoleMatrix(outcome, padding)
-    elif encoding_type == 'role-agnostic':
-        obs, res = data.getRoleAgnosticMatrix(outcome, padding)
-
-    # Create models
-    if model_type == 'CNN':
-        model = BaseCNN()
-    elif model_type == 'LSTM':
-        model = BaseLSTM()
-    if encoding_type == 'role':
         model.makeModel2D(obs[0].shape)
-    elif encoding_type == 'role-agnostic':
+    else:
+        obs, res = data.getRoleAgnosticMatrix(outcome, padding)
         model.makeModel(obs[0].shape)
 
     # Train model
@@ -47,13 +44,17 @@ if __name__ == "__main__":
         description="Obtain models to determine constructive and inclusive feedback in Open source communities")
     parser.add_argument('annotated_filename', help='File location of annotated file')
     parser.add_argument('dataset_filename', help='File location of extracted dataset')
-    parser.add_argument('model', help='Model type to use for training')
+    parser.add_argument('model', help='Model type to use for training, supported CNN and LSTM')
     parser.add_argument('outcome', help='Inclusive, Constructive, or Both')
     parser.add_argument('-roleRelevant', action='store_true', default=False,
                         help='Encoding method differentiates b/w conversation roles')
     parser.add_argument('-pad', action='store_true', default=False, help='Pad total length of each pull')
 
     args = parser.parse_args()
+
+    if args.model != 'CNN' and args.model != 'LSTM':
+        raise Exception("Model must be either CNN or LSTM")
+
     encodingType = 'role'
     if not args.roleRelevant:
         encodingType = 'role-agnostic'

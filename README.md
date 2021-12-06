@@ -88,12 +88,12 @@ Note: There is a rate limit associated with GitHub API. Please read more about
 before extracting data from a GitHub repo.
 
 ```
-GITACCESS=<YOUR_TOKEN>
+export GITACCESS=<YOUR_TOKEN>
 ```
 
 Run the script by passing in `organization` and `repo`  
 ```python
-python runDataExtraction.py <organization> <repo>
+python ./ml-conversational-analytic-tool/runDataExtraction.py <organization> <repo>
 ```
 
 - `organization` is the name of the repository owner
@@ -105,7 +105,7 @@ python runDataExtraction.py <organization> <repo>
 `featureVector.py` prepares your data for annotation use. Run the script by passing in path to `rawdatafile` and `words`.
 
 ```python
-python featureVector.py <rawdatafile> <words> -unannotated
+python ./ml-conversational-analytic-tool/featureVector.py <rawdatafile> <words> -unannotated
 ```
 
 - `rawdatafile` is location of raw data csv
@@ -128,7 +128,7 @@ There are two models available for training
 To train, run the script with required parameters path to `annotated_filename`, `dataset_filename`, `model`, and `outcome`.
 
 ```python
-python run.py <annotated_filename> <dataset_filename> <model> <outcome>
+python ./ml-conversational-analytic-tool/run.py <annotated_filename> <dataset_filename> <model> <outcome>
 ```
 
 - `annotated_filename` is the location of the annotated dataset file
