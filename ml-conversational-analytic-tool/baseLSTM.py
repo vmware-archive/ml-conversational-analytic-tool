@@ -75,6 +75,9 @@ class BaseLSTM:
                                         batch_size=batch_size, verbose=1)
             return train_hist
 
+    def saveModel(self, name, version):
+        self.model.save("{}/{}".format(name, version))
+
     def scoreModel(self, obs, res):
         """
         Score model for accuracy, precision and recall
