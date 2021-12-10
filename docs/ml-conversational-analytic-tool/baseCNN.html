@@ -35,18 +35,21 @@ from tensorflow import keras
 from tf_explain.core.smoothgrad import SmoothGrad
 
 
-# Class to create CNN
 class BaseCNN:
-    # Constructor creates model and explainer
     def __init__(self):
+        &#34;&#34;&#34;
+        Constructor creates model and explainer
+        &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
         self.model = keras.models.Sequential()
         self.explainer = SmoothGrad()
         self.model_ready = False
 
-    # Make 1d model for role agnostic data
     def makeModel(self, input_shape):
+        &#34;&#34;&#34;
+        Make 1d model for role agnostic data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
         self.model.add(keras.layers.MaxPooling1D(2))
@@ -57,8 +60,10 @@ class BaseCNN:
         self.dimension2 = False
         self.model_ready = True
 
-    # Make 2d model for role relevant data
     def makeModel2D(self, input_shape):
+        &#34;&#34;&#34;
+        Make 2d model for role relevant data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
         self.model.add(keras.layers.MaxPooling2D((4, 4)))
@@ -70,8 +75,10 @@ class BaseCNN:
         self.dimension2 = True
         self.model_ready = True
 
-    # Train model
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+        &#34;&#34;&#34;
+        Train model
+        &#34;&#34;&#34;
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
             train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
@@ -82,8 +89,13 @@ class BaseCNN:
                                         validation_split=val_split, verbose=1)
             return train_hist
 
-    # Score model for accuracy, precision and recall
+    def saveModel(self, name, version):
+        self.model.save(&#34;{}/{}&#34;.format(name, version))
+
     def scoreModel(self, obs, res):
+        &#34;&#34;&#34;
+        Score model for accuracy, precision and recall
+        &#34;&#34;&#34;
         evaluation = {}
         evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -91,15 +103,19 @@ class BaseCNN:
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
-    # Get predictions
     def predict(self, obs, labels=False):
+        &#34;&#34;&#34;
+        Get predictions
+        &#34;&#34;&#34;
         predictions = self.model.predict(np.array(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
-    # Explain prediction for obs using explainer
     def explain(self, obs):
+        &#34;&#34;&#34;
+        Explain prediction for obs using explainer
+        &#34;&#34;&#34;
         output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
         return output</code></pre>
 </details>
@@ -117,22 +133,26 @@ class BaseCNN:
 <span>class <span class="ident">BaseCNN</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Constructor creates model and explainer</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BaseCNN:
-    # Constructor creates model and explainer
     def __init__(self):
+        &#34;&#34;&#34;
+        Constructor creates model and explainer
+        &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
         self.model = keras.models.Sequential()
         self.explainer = SmoothGrad()
         self.model_ready = False
 
-    # Make 1d model for role agnostic data
     def makeModel(self, input_shape):
+        &#34;&#34;&#34;
+        Make 1d model for role agnostic data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
         self.model.add(keras.layers.MaxPooling1D(2))
@@ -143,8 +163,10 @@ class BaseCNN:
         self.dimension2 = False
         self.model_ready = True
 
-    # Make 2d model for role relevant data
     def makeModel2D(self, input_shape):
+        &#34;&#34;&#34;
+        Make 2d model for role relevant data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
         self.model.add(keras.layers.MaxPooling2D((4, 4)))
@@ -156,8 +178,10 @@ class BaseCNN:
         self.dimension2 = True
         self.model_ready = True
 
-    # Train model
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+        &#34;&#34;&#34;
+        Train model
+        &#34;&#34;&#34;
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
             train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
@@ -168,8 +192,13 @@ class BaseCNN:
                                         validation_split=val_split, verbose=1)
             return train_hist
 
-    # Score model for accuracy, precision and recall
+    def saveModel(self, name, version):
+        self.model.save(&#34;{}/{}&#34;.format(name, version))
+
     def scoreModel(self, obs, res):
+        &#34;&#34;&#34;
+        Score model for accuracy, precision and recall
+        &#34;&#34;&#34;
         evaluation = {}
         evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -177,15 +206,19 @@ class BaseCNN:
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
-    # Get predictions
     def predict(self, obs, labels=False):
+        &#34;&#34;&#34;
+        Get predictions
+        &#34;&#34;&#34;
         predictions = self.model.predict(np.array(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
-    # Explain prediction for obs using explainer
     def explain(self, obs):
+        &#34;&#34;&#34;
+        Explain prediction for obs using explainer
+        &#34;&#34;&#34;
         output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
         return output</code></pre>
 </details>
@@ -195,12 +228,15 @@ class BaseCNN:
 <span>def <span class="ident">explain</span></span>(<span>self, obs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Explain prediction for obs using explainer</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def explain(self, obs):
+    &#34;&#34;&#34;
+    Explain prediction for obs using explainer
+    &#34;&#34;&#34;
     output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
     return output</code></pre>
 </details>
@@ -209,12 +245,15 @@ class BaseCNN:
 <span>def <span class="ident">makeModel</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Make 1d model for role agnostic data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel(self, input_shape):
+    &#34;&#34;&#34;
+    Make 1d model for role agnostic data
+    &#34;&#34;&#34;
     self.input_shape = input_shape
     self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
     self.model.add(keras.layers.MaxPooling1D(2))
@@ -230,12 +269,15 @@ class BaseCNN:
 <span>def <span class="ident">makeModel2D</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Make 2d model for role relevant data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel2D(self, input_shape):
+    &#34;&#34;&#34;
+    Make 2d model for role relevant data
+    &#34;&#34;&#34;
     self.input_shape = input_shape
     self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
     self.model.add(keras.layers.MaxPooling2D((4, 4)))
@@ -252,20 +294,23 @@ class BaseCNN:
 <span>def <span class="ident">predict</span></span>(<span>self, obs, labels=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get predictions</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def predict(self, obs, labels=False):
+    &#34;&#34;&#34;
+    Get predictions
+    &#34;&#34;&#34;
     predictions = self.model.predict(np.array(obs))
     if labels:
         return [1 if x &gt; 0.5 else 0 for x in predictions]
     return predictions</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseCNN.BaseCNN.scoreModel"><code class="name flex">
-<span>def <span class="ident">scoreModel</span></span>(<span>self, obs, res)</span>
+<dt id="ml-conversational-analytic-tool.baseCNN.BaseCNN.saveModel"><code class="name flex">
+<span>def <span class="ident">saveModel</span></span>(<span>self, name, version)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -273,7 +318,23 @@ class BaseCNN:
 <summary>
 <span>Expand source code</span>
 </summary>
+<pre><code class="python">def saveModel(self, name, version):
+    self.model.save(&#34;{}/{}&#34;.format(name, version))</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.baseCNN.BaseCNN.scoreModel"><code class="name flex">
+<span>def <span class="ident">scoreModel</span></span>(<span>self, obs, res)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Score model for accuracy, precision and recall</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def scoreModel(self, obs, res):
+    &#34;&#34;&#34;
+    Score model for accuracy, precision and recall
+    &#34;&#34;&#34;
     evaluation = {}
     evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
     evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -286,12 +347,15 @@ class BaseCNN:
 <span>def <span class="ident">trainModel</span></span>(<span>self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Train model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+    &#34;&#34;&#34;
+    Train model
+    &#34;&#34;&#34;
     self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
     if val_set:
         train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
@@ -328,6 +392,7 @@ class BaseCNN:
 <li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.makeModel" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.makeModel">makeModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.makeModel2D" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.makeModel2D">makeModel2D</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.predict" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.predict">predict</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.saveModel" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.saveModel">saveModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.scoreModel" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.scoreModel">scoreModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseCNN.BaseCNN.trainModel" href="#ml-conversational-analytic-tool.baseCNN.BaseCNN.trainModel">trainModel</a></code></li>
 </ul>

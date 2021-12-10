@@ -35,8 +35,10 @@ import os
 from githubDataExtraction import GithubDataExtractor
 
 
-# Method to extract data for all repositories in organization
 def getRepos(access_token, organization, reaction):
+    &#34;&#34;&#34;
+    Method to extract data for all repositories in organization
+    &#34;&#34;&#34;
     extractor = GithubDataExtractor(access_token)  # Create object
     repos = extractor.g_ses.get_organization(organization).get_repos()
     for repo in repos:
@@ -45,8 +47,10 @@ def getRepos(access_token, organization, reaction):
         extractor.getAllPulls(&#34;&#34;, reaction)
 
 
-# Method to extract data for an individual repository
 def getRepo(access_token, organization, reponame, reaction):
+    &#34;&#34;&#34;
+    Method to extract data for an individual repository
+    &#34;&#34;&#34;
     extractor = GithubDataExtractor(access_token)  # Create object 
     extractor.openRepo(organization, reponame)
     extractor.getAllPulls(&#34;&#34;, reaction)
@@ -77,12 +81,15 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getRepo</span></span>(<span>access_token, organization, reponame, reaction)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to extract data for an individual repository</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getRepo(access_token, organization, reponame, reaction):
+    &#34;&#34;&#34;
+    Method to extract data for an individual repository
+    &#34;&#34;&#34;
     extractor = GithubDataExtractor(access_token)  # Create object 
     extractor.openRepo(organization, reponame)
     extractor.getAllPulls(&#34;&#34;, reaction)</code></pre>
@@ -92,12 +99,15 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getRepos</span></span>(<span>access_token, organization, reaction)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to extract data for all repositories in organization</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getRepos(access_token, organization, reaction):
+    &#34;&#34;&#34;
+    Method to extract data for all repositories in organization
+    &#34;&#34;&#34;
     extractor = GithubDataExtractor(access_token)  # Create object
     repos = extractor.g_ses.get_organization(organization).get_repos()
     for repo in repos:

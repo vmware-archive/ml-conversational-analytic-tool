@@ -29,20 +29,20 @@
 <pre><code class="python"># Copyright 2021 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import argparse
 import os
-# Imports
 import time
 
+import argparse
 import pandas as pd
 from github import Github
 from github.GithubException import RateLimitExceededException
 
 
-# Class to extract pull data from a github repo. The data includes reviews, comments, and other metadata from each pull.
 class GithubDataExtractor:
-    # Constructor requires an access token to start a Github session, and specifies instance variables
     def __init__(self, access_token):
+        &#34;&#34;&#34;
+        Constructor requires an access token to start a Github session, and specifies instance variables
+        &#34;&#34;&#34;
         self.g_ses = Github(access_token)  # Github object is used as a channel to the Github API
         self.current_repo = None  # Current Opended Repo
         self.reaction_flag = False
@@ -50,18 +50,22 @@ class GithubDataExtractor:
         self.repo_name = &#34;&#34;
         self.organization = &#34;&#34;
 
-    # Method to  open (access) repository with given organization and repository name (reponame).
-    # Parameters: usernmae - owner of the repository, repo_name - name of repo to be opened
     def openRepo(self, organization, repo_name):
+        &#34;&#34;&#34;
+        Method to  open (access) repository with given organization and repository name (reponame).
+        Parameters: username - owner of the repository, repo_name - name of repo to be opened
+        &#34;&#34;&#34;
         self.current_repo = self.g_ses.get_repo(organization + &#34;/&#34; + repo_name)  # Open repo
         self.repo_opened = True
         self.repo_name = repo_name
         self.organization = organization
         print(&#34;Opened repo {} - {}&#34;.format(repo_name, organization))
 
-    # Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
-    # export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
     def getAllPulls(self, name=&#34;&#34;, reaction_flag=False, export_to_csv=True):
+        &#34;&#34;&#34;
+        Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
+        export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
+        &#34;&#34;&#34;
         self.reaction_flag = reaction_flag
         if self.repo_opened:  # Verify if a repo has been opened
             pull_data = []
@@ -78,9 +82,11 @@ class GithubDataExtractor:
             return pull_df
         print(&#34;Please open a Repo&#34;)
 
-    # Extract pulls with given state. Parameters: state - state of the pull (open or closed)
-    # Return: list of dictionaries containing data regardining each pull
     def getPullsByState(self, state):
+        &#34;&#34;&#34;
+        Extract pulls with given state. Parameters: state - state of the pull (open or closed)
+        Return: list of dictionaries containing data regardining each pull
+        &#34;&#34;&#34;
         pull_data = []
         try:  # Call the Github api to get all pulls
             pulls = self.current_repo.get_pulls(state=state, sort=&#39;create&#39;)
@@ -98,9 +104,11 @@ class GithubDataExtractor:
                 pull_data.append(self.getPullFeatures(pull))
         return pull_data
 
-    # Method to form a list of json strings rerpesenting comments (reviews or issue).
-    # Parameters: comments - list of comment objects. Returns: List of json strings
     def listOfComments(self, comments):
+        &#34;&#34;&#34;
+        Method to form a list of json strings rerpesenting comments (reviews or issue).
+        Parameters: comments - list of comment objects. Returns: List of json strings
+        &#34;&#34;&#34;
         list_comments = []
 
         # Iterate over each comment
@@ -142,9 +150,11 @@ class GithubDataExtractor:
                                               &#34;Updated_At&#34;: str(comment.updated_at)}))
         return list_comments
 
-    # Method to get all data for a particular pull. Parameters: pull - object representing a pull
-    # Returns: dictionary containing all data of a pull
     def getPullFeatures(self, pull):
+        &#34;&#34;&#34;
+        Method to get all data for a particular pull. Parameters: pull - object representing a pull
+        Returns: dictionary containing all data of a pull
+        &#34;&#34;&#34;
         pull_dict = {}
         pull_dict[&#34;Number&#34;] = pull.number
         pull_dict[&#34;Title&#34;] = pull.title
@@ -187,6 +197,7 @@ if __name__ == &#34;__main__&#34;:
     ACCESS_TOKEN = os.environ[&#34;GITACCESS&#34;]  # Access Github token from environment for security purposes
     extractor = GithubDataExtractor(ACCESS_TOKEN)  # Create object
     extractor.openRepo(args.organization, args.reponame)  # Open repo
+
     # Extract all pulls and export them to .csv
     if args.filename:
         extractor.getAllPulls(args.filename, args.reactions)
@@ -208,14 +219,16 @@ if __name__ == &#34;__main__&#34;:
 <span>(</span><span>access_token)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Constructor requires an access token to start a Github session, and specifies instance variables</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GithubDataExtractor:
-    # Constructor requires an access token to start a Github session, and specifies instance variables
     def __init__(self, access_token):
+        &#34;&#34;&#34;
+        Constructor requires an access token to start a Github session, and specifies instance variables
+        &#34;&#34;&#34;
         self.g_ses = Github(access_token)  # Github object is used as a channel to the Github API
         self.current_repo = None  # Current Opended Repo
         self.reaction_flag = False
@@ -223,18 +236,22 @@ if __name__ == &#34;__main__&#34;:
         self.repo_name = &#34;&#34;
         self.organization = &#34;&#34;
 
-    # Method to  open (access) repository with given organization and repository name (reponame).
-    # Parameters: usernmae - owner of the repository, repo_name - name of repo to be opened
     def openRepo(self, organization, repo_name):
+        &#34;&#34;&#34;
+        Method to  open (access) repository with given organization and repository name (reponame).
+        Parameters: username - owner of the repository, repo_name - name of repo to be opened
+        &#34;&#34;&#34;
         self.current_repo = self.g_ses.get_repo(organization + &#34;/&#34; + repo_name)  # Open repo
         self.repo_opened = True
         self.repo_name = repo_name
         self.organization = organization
         print(&#34;Opened repo {} - {}&#34;.format(repo_name, organization))
 
-    # Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
-    # export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
     def getAllPulls(self, name=&#34;&#34;, reaction_flag=False, export_to_csv=True):
+        &#34;&#34;&#34;
+        Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
+        export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
+        &#34;&#34;&#34;
         self.reaction_flag = reaction_flag
         if self.repo_opened:  # Verify if a repo has been opened
             pull_data = []
@@ -251,9 +268,11 @@ if __name__ == &#34;__main__&#34;:
             return pull_df
         print(&#34;Please open a Repo&#34;)
 
-    # Extract pulls with given state. Parameters: state - state of the pull (open or closed)
-    # Return: list of dictionaries containing data regardining each pull
     def getPullsByState(self, state):
+        &#34;&#34;&#34;
+        Extract pulls with given state. Parameters: state - state of the pull (open or closed)
+        Return: list of dictionaries containing data regardining each pull
+        &#34;&#34;&#34;
         pull_data = []
         try:  # Call the Github api to get all pulls
             pulls = self.current_repo.get_pulls(state=state, sort=&#39;create&#39;)
@@ -271,9 +290,11 @@ if __name__ == &#34;__main__&#34;:
                 pull_data.append(self.getPullFeatures(pull))
         return pull_data
 
-    # Method to form a list of json strings rerpesenting comments (reviews or issue).
-    # Parameters: comments - list of comment objects. Returns: List of json strings
     def listOfComments(self, comments):
+        &#34;&#34;&#34;
+        Method to form a list of json strings rerpesenting comments (reviews or issue).
+        Parameters: comments - list of comment objects. Returns: List of json strings
+        &#34;&#34;&#34;
         list_comments = []
 
         # Iterate over each comment
@@ -315,9 +336,11 @@ if __name__ == &#34;__main__&#34;:
                                               &#34;Updated_At&#34;: str(comment.updated_at)}))
         return list_comments
 
-    # Method to get all data for a particular pull. Parameters: pull - object representing a pull
-    # Returns: dictionary containing all data of a pull
     def getPullFeatures(self, pull):
+        &#34;&#34;&#34;
+        Method to get all data for a particular pull. Parameters: pull - object representing a pull
+        Returns: dictionary containing all data of a pull
+        &#34;&#34;&#34;
         pull_dict = {}
         pull_dict[&#34;Number&#34;] = pull.number
         pull_dict[&#34;Title&#34;] = pull.title
@@ -353,12 +376,17 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getAllPulls</span></span>(<span>self, name='', reaction_flag=False, export_to_csv=True)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
+export - if the dataframe should be exported to csv. Returns: Dataframe with pull data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getAllPulls(self, name=&#34;&#34;, reaction_flag=False, export_to_csv=True):
+    &#34;&#34;&#34;
+    Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
+    export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
+    &#34;&#34;&#34;
     self.reaction_flag = reaction_flag
     if self.repo_opened:  # Verify if a repo has been opened
         pull_data = []
@@ -380,12 +408,17 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getPullFeatures</span></span>(<span>self, pull)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to get all data for a particular pull. Parameters: pull - object representing a pull
+Returns: dictionary containing all data of a pull</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getPullFeatures(self, pull):
+    &#34;&#34;&#34;
+    Method to get all data for a particular pull. Parameters: pull - object representing a pull
+    Returns: dictionary containing all data of a pull
+    &#34;&#34;&#34;
     pull_dict = {}
     pull_dict[&#34;Number&#34;] = pull.number
     pull_dict[&#34;Title&#34;] = pull.title
@@ -420,12 +453,17 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getPullsByState</span></span>(<span>self, state)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extract pulls with given state. Parameters: state - state of the pull (open or closed)
+Return: list of dictionaries containing data regardining each pull</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getPullsByState(self, state):
+    &#34;&#34;&#34;
+    Extract pulls with given state. Parameters: state - state of the pull (open or closed)
+    Return: list of dictionaries containing data regardining each pull
+    &#34;&#34;&#34;
     pull_data = []
     try:  # Call the Github api to get all pulls
         pulls = self.current_repo.get_pulls(state=state, sort=&#39;create&#39;)
@@ -448,12 +486,17 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">listOfComments</span></span>(<span>self, comments)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to form a list of json strings rerpesenting comments (reviews or issue).
+Parameters: comments - list of comment objects. Returns: List of json strings</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def listOfComments(self, comments):
+    &#34;&#34;&#34;
+    Method to form a list of json strings rerpesenting comments (reviews or issue).
+    Parameters: comments - list of comment objects. Returns: List of json strings
+    &#34;&#34;&#34;
     list_comments = []
 
     # Iterate over each comment
@@ -500,12 +543,18 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">openRepo</span></span>(<span>self, organization, repo_name)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to
+open (access) repository with given organization and repository name (reponame).
+Parameters: username - owner of the repository, repo_name - name of repo to be opened</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def openRepo(self, organization, repo_name):
+    &#34;&#34;&#34;
+    Method to  open (access) repository with given organization and repository name (reponame).
+    Parameters: username - owner of the repository, repo_name - name of repo to be opened
+    &#34;&#34;&#34;
     self.current_repo = self.g_ses.get_repo(organization + &#34;/&#34; + repo_name)  # Open repo
     self.repo_opened = True
     self.repo_name = repo_name
