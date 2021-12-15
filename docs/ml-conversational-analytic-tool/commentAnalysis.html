@@ -37,17 +37,21 @@ nltk.download(&#39;vader_lexicon&#39;)  # Model download
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
-# Class to analyze text to obtain desired features
 class CommentAnalyzer:
-    # Constructors form a dictionary to be used for counting.
-    # Parameters: words - list of words to count
     def __init__(self, words):
+        &#34;&#34;&#34;
+        Constructors form a dictionary to be used for counting.
+        Parameters: words - list of words to count
+        &#34;&#34;&#34;
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
         self.vader_sentiment = SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
 
-    # Method to get desired features from an input comment.
-    # Parameters: comment - string. Returns: dictionary with features
     def analyzeComment(self, comment):
+        &#34;&#34;&#34;
+        Method to get desired features from an input comment.
+        Parameters: comment - string.
+        Returns: dictionary with features
+        &#34;&#34;&#34;
         result = {}  # Create return dictionary
         cleaned_comment = self.preProcess(comment)  # Clean comment text
         # result[&#39;Word Counts&#39;] = self.countWords(cleaned_comment)  # Determine word counts
@@ -56,16 +60,22 @@ class CommentAnalyzer:
         result[&#39;Code Blocks&#39;] = self.getCodeBlockCount(cleaned_comment)  # Determine code block count
         return result
 
-    # Method to clean and return text. Parameters: text - string.
-    # Returns: string after cleaning
     def preProcess(self, text):
+        &#34;&#34;&#34;
+        Method to clean and return text.
+        Parameters: text - string.
+        Returns: string after cleaning
+        &#34;&#34;&#34;
         cleaned_text = text.strip()  # Remove trailing and starting spaces
         cleaned_text = cleaned_text.lower()  # Convert to lowercase
         return cleaned_text
 
-    # Method to determine word count. Parameters: comment - string
-    # Returns: dictionary with word counts
     def countWords(self, comment):
+        &#34;&#34;&#34;
+        Method to determine word count.
+        Parameters: comment - string
+        Returns: dictionary with word counts
+        &#34;&#34;&#34;
         words = comment.split(&#34; &#34;)  # Split text into words
         current_word_count = self.word_count.copy()  # Copy default dict for new count
         for word in words:  # Iterate over all words
@@ -73,22 +83,29 @@ class CommentAnalyzer:
                 current_word_count[word] = current_word_count[word] + 1
         return current_word_count
 
-    # Method to determine the code blocks. Parameters: comment - string
-    # Returns: integer count
     def getCodeBlockCount(self, comment):
+        &#34;&#34;&#34;
+        Method to determine the code blocks.
+        Parameters: comment - string
+        Returns: integer count
+        &#34;&#34;&#34;
         count = comment.count(&#34;```&#34;)  # Find occurences of code block
         if count % 2 != 0:  # Should be in pairs
             print(&#34;Warning: Mismatched code blocks&#34;)
             return int(count / 2 - 1)  # Subtract 1 since unmatched pair
         return int(count / 2)  # Divide by 2 since pairs
 
-    # Method to determine sentiment. Parameters: comment - string
-    # Returns: dictionary with positive, negative and neutral scores
     def getSentiment(self, comment):
+        &#34;&#34;&#34;
+        Method to determine sentiment. Parameters: comment - string
+        Returns: dictionary with positive, negative and neutral scores
+        &#34;&#34;&#34;
         return self.vader_sentiment.polarity_scores(comment)[&#34;compound&#34;]
 
-    # Method to change words to count. Parameters: Set new word count with new keys/
     def changeWords(self, words):
+        &#34;&#34;&#34;
+        Method to change words to count. Parameters: Set new word count with new keys/
+        &#34;&#34;&#34;
         self.word_count = {word: 0 for word in words}
 
 
@@ -120,21 +137,27 @@ if __name__ == &#34;__main__&#34;:
 <span>(</span><span>words)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Constructors form a dictionary to be used for counting.
+Parameters: words - list of words to count</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CommentAnalyzer:
-    # Constructors form a dictionary to be used for counting.
-    # Parameters: words - list of words to count
     def __init__(self, words):
+        &#34;&#34;&#34;
+        Constructors form a dictionary to be used for counting.
+        Parameters: words - list of words to count
+        &#34;&#34;&#34;
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
         self.vader_sentiment = SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
 
-    # Method to get desired features from an input comment.
-    # Parameters: comment - string. Returns: dictionary with features
     def analyzeComment(self, comment):
+        &#34;&#34;&#34;
+        Method to get desired features from an input comment.
+        Parameters: comment - string.
+        Returns: dictionary with features
+        &#34;&#34;&#34;
         result = {}  # Create return dictionary
         cleaned_comment = self.preProcess(comment)  # Clean comment text
         # result[&#39;Word Counts&#39;] = self.countWords(cleaned_comment)  # Determine word counts
@@ -143,16 +166,22 @@ if __name__ == &#34;__main__&#34;:
         result[&#39;Code Blocks&#39;] = self.getCodeBlockCount(cleaned_comment)  # Determine code block count
         return result
 
-    # Method to clean and return text. Parameters: text - string.
-    # Returns: string after cleaning
     def preProcess(self, text):
+        &#34;&#34;&#34;
+        Method to clean and return text.
+        Parameters: text - string.
+        Returns: string after cleaning
+        &#34;&#34;&#34;
         cleaned_text = text.strip()  # Remove trailing and starting spaces
         cleaned_text = cleaned_text.lower()  # Convert to lowercase
         return cleaned_text
 
-    # Method to determine word count. Parameters: comment - string
-    # Returns: dictionary with word counts
     def countWords(self, comment):
+        &#34;&#34;&#34;
+        Method to determine word count.
+        Parameters: comment - string
+        Returns: dictionary with word counts
+        &#34;&#34;&#34;
         words = comment.split(&#34; &#34;)  # Split text into words
         current_word_count = self.word_count.copy()  # Copy default dict for new count
         for word in words:  # Iterate over all words
@@ -160,22 +189,29 @@ if __name__ == &#34;__main__&#34;:
                 current_word_count[word] = current_word_count[word] + 1
         return current_word_count
 
-    # Method to determine the code blocks. Parameters: comment - string
-    # Returns: integer count
     def getCodeBlockCount(self, comment):
+        &#34;&#34;&#34;
+        Method to determine the code blocks.
+        Parameters: comment - string
+        Returns: integer count
+        &#34;&#34;&#34;
         count = comment.count(&#34;```&#34;)  # Find occurences of code block
         if count % 2 != 0:  # Should be in pairs
             print(&#34;Warning: Mismatched code blocks&#34;)
             return int(count / 2 - 1)  # Subtract 1 since unmatched pair
         return int(count / 2)  # Divide by 2 since pairs
 
-    # Method to determine sentiment. Parameters: comment - string
-    # Returns: dictionary with positive, negative and neutral scores
     def getSentiment(self, comment):
+        &#34;&#34;&#34;
+        Method to determine sentiment. Parameters: comment - string
+        Returns: dictionary with positive, negative and neutral scores
+        &#34;&#34;&#34;
         return self.vader_sentiment.polarity_scores(comment)[&#34;compound&#34;]
 
-    # Method to change words to count. Parameters: Set new word count with new keys/
     def changeWords(self, words):
+        &#34;&#34;&#34;
+        Method to change words to count. Parameters: Set new word count with new keys/
+        &#34;&#34;&#34;
         self.word_count = {word: 0 for word in words}</code></pre>
 </details>
 <h3>Methods</h3>
@@ -184,12 +220,19 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">analyzeComment</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to get desired features from an input comment.
+Parameters: comment - string.
+Returns: dictionary with features</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def analyzeComment(self, comment):
+    &#34;&#34;&#34;
+    Method to get desired features from an input comment.
+    Parameters: comment - string.
+    Returns: dictionary with features
+    &#34;&#34;&#34;
     result = {}  # Create return dictionary
     cleaned_comment = self.preProcess(comment)  # Clean comment text
     # result[&#39;Word Counts&#39;] = self.countWords(cleaned_comment)  # Determine word counts
@@ -203,12 +246,15 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">changeWords</span></span>(<span>self, words)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to change words to count. Parameters: Set new word count with new keys/</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def changeWords(self, words):
+    &#34;&#34;&#34;
+    Method to change words to count. Parameters: Set new word count with new keys/
+    &#34;&#34;&#34;
     self.word_count = {word: 0 for word in words}</code></pre>
 </details>
 </dd>
@@ -216,12 +262,19 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">countWords</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to determine word count.
+Parameters: comment - string
+Returns: dictionary with word counts</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def countWords(self, comment):
+    &#34;&#34;&#34;
+    Method to determine word count.
+    Parameters: comment - string
+    Returns: dictionary with word counts
+    &#34;&#34;&#34;
     words = comment.split(&#34; &#34;)  # Split text into words
     current_word_count = self.word_count.copy()  # Copy default dict for new count
     for word in words:  # Iterate over all words
@@ -234,12 +287,19 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getCodeBlockCount</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to determine the code blocks.
+Parameters: comment - string
+Returns: integer count</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getCodeBlockCount(self, comment):
+    &#34;&#34;&#34;
+    Method to determine the code blocks.
+    Parameters: comment - string
+    Returns: integer count
+    &#34;&#34;&#34;
     count = comment.count(&#34;```&#34;)  # Find occurences of code block
     if count % 2 != 0:  # Should be in pairs
         print(&#34;Warning: Mismatched code blocks&#34;)
@@ -251,12 +311,17 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">getSentiment</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to determine sentiment. Parameters: comment - string
+Returns: dictionary with positive, negative and neutral scores</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getSentiment(self, comment):
+    &#34;&#34;&#34;
+    Method to determine sentiment. Parameters: comment - string
+    Returns: dictionary with positive, negative and neutral scores
+    &#34;&#34;&#34;
     return self.vader_sentiment.polarity_scores(comment)[&#34;compound&#34;]</code></pre>
 </details>
 </dd>
@@ -264,12 +329,19 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">preProcess</span></span>(<span>self, text)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Method to clean and return text.
+Parameters: text - string.
+Returns: string after cleaning</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def preProcess(self, text):
+    &#34;&#34;&#34;
+    Method to clean and return text.
+    Parameters: text - string.
+    Returns: string after cleaning
+    &#34;&#34;&#34;
     cleaned_text = text.strip()  # Remove trailing and starting spaces
     cleaned_text = cleaned_text.lower()  # Convert to lowercase
     return cleaned_text</code></pre>

@@ -135,6 +135,8 @@ python ./ml-conversational-analytic-tool/run.py <annotated_filename> <dataset_fi
 - `dataset_filename` is the location of the raw data
 - `model` is the type of model and can be 'LSTM' or 'CNN'
 - `outcome` can be 'Constructive', 'Inclusive' or 'Both'
+- (optional) `-save NAME` Save the trained model, an output `NAME` must be specified. The model is saved in `models/name-outcome` directory.
+- (optional) `-save_version VERSION` If `-save NAME` is specified, save the model using given `NAME` nad `VERSION` The parameter is ignored if `-save NAME` is missing. By default, version `001` is used.
 - (optional) `-roleRelevant` indicates that the encoding generated should be a stacked matrix representing user roles in
   conversation. If it is not set then a single matrix representing each comment/review without the role is generated.
 - (optional) `-pad` indicates that the number of comment/review should be padded to be a constant value. This argument

@@ -35,17 +35,20 @@ from sklearn.metrics import precision_recall_fscore_support
 from tensorflow import keras
 
 
-# Class to create LSTM
 class BaseLSTM:
-    # Constructor creates model
     def __init__(self):
+        &#34;&#34;&#34;
+        Constructor creates model
+        &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
         self.model = None
         self.model_ready = False
 
-    # Make lstm model for role agnostic data
     def makeModel(self, input_shape):
+        &#34;&#34;&#34;
+        Make lstm model for role agnostic data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model = keras.models.Sequential()
         self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
@@ -55,22 +58,29 @@ class BaseLSTM:
         self.dimension2 = False
         self.model_ready = True
 
-    # Made lstm model for role relevant layers data
     def makeModel2D(self, input_shape):
+        &#34;&#34;&#34;
+        Made lstm model for role relevant layers data
+        &#34;&#34;&#34;
+
         # Inputs
         self.input_shape = input_shape
         inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
+
         # Pipe output of author and reviewer layer to two lstm
         author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
         reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
+
         # Create author lstm
         author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
         author_dropout = keras.layers.Dropout(0.2)(author_lstm)
         author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
+
         # Create reviewer lstm
         reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
         reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
         reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
+
         # Concatenate author and reviewer output
         combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
         output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
@@ -80,7 +90,6 @@ class BaseLSTM:
         self.dimension2 = True
         self.model_ready = True
 
-    # Train model
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
@@ -94,8 +103,13 @@ class BaseLSTM:
                                         batch_size=batch_size, verbose=1)
             return train_hist
 
-    # Score model for accuracy, precision and recall
+    def saveModel(self, name, version):
+        self.model.save(&#34;{}/{}&#34;.format(name, version))
+
     def scoreModel(self, obs, res):
+        &#34;&#34;&#34;
+        Score model for accuracy, precision and recall
+        &#34;&#34;&#34;
         evaluation = {}
         evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -103,21 +117,24 @@ class BaseLSTM:
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
-    # Get predictions
     def predict(self, obs, labels=False):
         predictions = self.model.predict(tf.ragged.stack(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
-    # Explain prediction for obs by calculating gradients
     def explain(self, obs):
+        &#34;&#34;&#34;
+        Explain prediction for obs by calculating gradients
+        &#34;&#34;&#34;
         grads = self._gradientImportance(obs)
         imp = grads[:, 0] + grads[:, 1]
         return imp
 
-    # Get gradients
     def _gradientImportance(self, seq):
+        &#34;&#34;&#34;
+        Get gradients
+        &#34;&#34;&#34;
         seq = tf.Variable(seq[np.newaxis, :, :])
         with tf.GradientTape() as tape:
             predictions = self.model(seq)
@@ -140,21 +157,25 @@ class BaseLSTM:
 <span>class <span class="ident">BaseLSTM</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Constructor creates model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BaseLSTM:
-    # Constructor creates model
     def __init__(self):
+        &#34;&#34;&#34;
+        Constructor creates model
+        &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
         self.model = None
         self.model_ready = False
 
-    # Make lstm model for role agnostic data
     def makeModel(self, input_shape):
+        &#34;&#34;&#34;
+        Make lstm model for role agnostic data
+        &#34;&#34;&#34;
         self.input_shape = input_shape
         self.model = keras.models.Sequential()
         self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
@@ -164,22 +185,29 @@ class BaseLSTM:
         self.dimension2 = False
         self.model_ready = True
 
-    # Made lstm model for role relevant layers data
     def makeModel2D(self, input_shape):
+        &#34;&#34;&#34;
+        Made lstm model for role relevant layers data
+        &#34;&#34;&#34;
+
         # Inputs
         self.input_shape = input_shape
         inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
+
         # Pipe output of author and reviewer layer to two lstm
         author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
         reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
+
         # Create author lstm
         author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
         author_dropout = keras.layers.Dropout(0.2)(author_lstm)
         author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
+
         # Create reviewer lstm
         reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
         reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
         reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
+
         # Concatenate author and reviewer output
         combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
         output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
@@ -189,7 +217,6 @@ class BaseLSTM:
         self.dimension2 = True
         self.model_ready = True
 
-    # Train model
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
@@ -203,8 +230,13 @@ class BaseLSTM:
                                         batch_size=batch_size, verbose=1)
             return train_hist
 
-    # Score model for accuracy, precision and recall
+    def saveModel(self, name, version):
+        self.model.save(&#34;{}/{}&#34;.format(name, version))
+
     def scoreModel(self, obs, res):
+        &#34;&#34;&#34;
+        Score model for accuracy, precision and recall
+        &#34;&#34;&#34;
         evaluation = {}
         evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -212,21 +244,24 @@ class BaseLSTM:
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
-    # Get predictions
     def predict(self, obs, labels=False):
         predictions = self.model.predict(tf.ragged.stack(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
-    # Explain prediction for obs by calculating gradients
     def explain(self, obs):
+        &#34;&#34;&#34;
+        Explain prediction for obs by calculating gradients
+        &#34;&#34;&#34;
         grads = self._gradientImportance(obs)
         imp = grads[:, 0] + grads[:, 1]
         return imp
 
-    # Get gradients
     def _gradientImportance(self, seq):
+        &#34;&#34;&#34;
+        Get gradients
+        &#34;&#34;&#34;
         seq = tf.Variable(seq[np.newaxis, :, :])
         with tf.GradientTape() as tape:
             predictions = self.model(seq)
@@ -241,12 +276,15 @@ class BaseLSTM:
 <span>def <span class="ident">explain</span></span>(<span>self, obs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Explain prediction for obs by calculating gradients</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def explain(self, obs):
+    &#34;&#34;&#34;
+    Explain prediction for obs by calculating gradients
+    &#34;&#34;&#34;
     grads = self._gradientImportance(obs)
     imp = grads[:, 0] + grads[:, 1]
     return imp</code></pre>
@@ -256,12 +294,15 @@ class BaseLSTM:
 <span>def <span class="ident">makeModel</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Make lstm model for role agnostic data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel(self, input_shape):
+    &#34;&#34;&#34;
+    Make lstm model for role agnostic data
+    &#34;&#34;&#34;
     self.input_shape = input_shape
     self.model = keras.models.Sequential()
     self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
@@ -276,26 +317,34 @@ class BaseLSTM:
 <span>def <span class="ident">makeModel2D</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Made lstm model for role relevant layers data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel2D(self, input_shape):
+    &#34;&#34;&#34;
+    Made lstm model for role relevant layers data
+    &#34;&#34;&#34;
+
     # Inputs
     self.input_shape = input_shape
     inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
+
     # Pipe output of author and reviewer layer to two lstm
     author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
     reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
+
     # Create author lstm
     author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
     author_dropout = keras.layers.Dropout(0.2)(author_lstm)
     author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
+
     # Create reviewer lstm
     reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
     reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
     reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
+
     # Concatenate author and reviewer output
     combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
     output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
@@ -322,8 +371,8 @@ class BaseLSTM:
     return predictions</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel"><code class="name flex">
-<span>def <span class="ident">scoreModel</span></span>(<span>self, obs, res)</span>
+<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel"><code class="name flex">
+<span>def <span class="ident">saveModel</span></span>(<span>self, name, version)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -331,7 +380,23 @@ class BaseLSTM:
 <summary>
 <span>Expand source code</span>
 </summary>
+<pre><code class="python">def saveModel(self, name, version):
+    self.model.save(&#34;{}/{}&#34;.format(name, version))</code></pre>
+</details>
+</dd>
+<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel"><code class="name flex">
+<span>def <span class="ident">scoreModel</span></span>(<span>self, obs, res)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Score model for accuracy, precision and recall</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def scoreModel(self, obs, res):
+    &#34;&#34;&#34;
+    Score model for accuracy, precision and recall
+    &#34;&#34;&#34;
     evaluation = {}
     evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
     evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
@@ -388,6 +453,7 @@ class BaseLSTM:
 <li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel">makeModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel2D" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel2D">makeModel2D</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.predict" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.predict">predict</a></code></li>
+<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel">saveModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel">scoreModel</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.trainModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.trainModel">trainModel</a></code></li>
 </ul>

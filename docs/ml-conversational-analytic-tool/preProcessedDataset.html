@@ -36,10 +36,11 @@ import pandas as pd
 import tensorflow as tf
 
 
-# Class to prepare dataset for machine learning tasks
 class PreProcessedDataset:
-    # Set flags and instance variables in constructor
     def __init__(self, vocab_size=1000, no_tokens=512, max_pull_length=100):
+        &#34;&#34;&#34;
+        Set flags and instance variables in constructor
+        &#34;&#34;&#34;
         self.annotated_data = None
         self.dataset = None
         self.full_dataset = None
@@ -59,8 +60,11 @@ class PreProcessedDataset:
         self.full_dataset_ready = False
         self.encode_ready = False
 
-    # Setup the preprocessed dataset
     def setupPreProcess(self, annotated_filename, dataset_filename):
+        &#34;&#34;&#34;
+        Setup the preprocessed dataset
+        &#34;&#34;&#34;
+
         # Load datasets
         self.loadAnnotatedData(annotated_filename)
         self.loadDataset(dataset_filename)
@@ -79,8 +83,11 @@ class PreProcessedDataset:
         self.full_dataset[&#39;Review_Comments&#39;] = self.full_dataset[&#39;Review_Comments&#39;].apply(
             lambda comment: stringToDict(comment))
 
-    # Encode all utterances
     def encodeData(self):
+        &#34;&#34;&#34;
+        Encode all utterances
+        &#34;&#34;&#34;
+
         all_utterances = self._getObsResUsers()
         # Encode each utterance
         for utterances in all_utterances:
@@ -98,8 +105,11 @@ class PreProcessedDataset:
             self.results[&#39;Inclusive&#39;] = self.results[&#39;Inclusive&#39;][:idx] + self.results[&#39;Inclusive&#39;][idx + 1:]
         self.curr_max_length = max([len(x) for x in self.all_encoded_utterances])
 
-    # Get matrix observation and results for ML task soutcome = Inclusive, Constructive, or None -&gt; both 
     def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+        &#34;&#34;&#34;
+        Get matrix observation and results for ML task outcome = Inclusive, Constructive, or None -&gt; both
+        &#34;&#34;&#34;
+
         obs = []
         for i in range(len(self.all_encoded_utterances)):
             def pad(inp):
@@ -116,17 +126,21 @@ class PreProcessedDataset:
         res = self.getRes(outcome)
         return obs, res
 
-    # Get stacked matrix observation and results for ML task 
     def getRoleMatrix(self, outcome=None, padPull=True):
+        &#34;&#34;&#34;
+        Get stacked matrix observation and results for ML task
+        &#34;&#34;&#34;
         # Check if results must be padded to same length for each pull
         if padPull:
             # Author and reviwer layers
             layer_writer = []
             layer_reviewer = []
+
             for i in range(len(self.all_encoded_utterances)):
                 writer_comments = []
                 reviewer_comments = []
                 writer = self.all_users[i][0]
+
                 for j in range(len(self.all_encoded_utterances[i])):
                     # Check if author or reviewer
                     if self.all_users[i][j] == writer:
@@ -136,12 +150,14 @@ class PreProcessedDataset:
                         reviewer_comments.append(self.all_encoded_utterances[i][j])
                         writer_comments.append(np.zeros(self.no_tokens))
                     padding = [0] * self.no_tokens
+
                     # Pad both reviewer and writer layers
                     while len(writer_comments) &lt; self.curr_max_length:
                         writer_comments.append(padding.copy())
                         reviewer_comments.append(padding.copy())
                     layer_writer.append(np.array(writer_comments))
                     layer_reviewer.append(np.array(reviewer_comments))
+
             # Stack reviwer and author matrices
             obs = np.stack((layer_writer, layer_reviewer), axis=3)
             res = self.getRes(outcome)
@@ -152,6 +168,7 @@ class PreProcessedDataset:
                 writer_comments = []
                 reviewer_comments = []
                 writer = self.all_users[i][0]
+
                 for j in range(len(self.all_encoded_utterances[i])):
                     if self.all_users[i][j] == writer:
                         writer_comments.append(self.all_encoded_utterances[i][j])
@@ -164,24 +181,32 @@ class PreProcessedDataset:
             res = self.getRes(outcome)
             return obs, res
 
-    # Get list of results
     def getRes(self, outcome=None):
+        &#34;&#34;&#34;
+        Get list of results
+        &#34;&#34;&#34;
         if outcome:
             return self.results[outcome]
         return pd.DataFrame(data=self.results)
 
-    # Load annotated dataset from file
     def loadAnnotatedData(self, filename):
+        &#34;&#34;&#34;
+        Load annotated dataset from file
+        &#34;&#34;&#34;
         self.annotated_data = pd.read_csv(filename)
         self.annotated_data_open = True
 
-    # Load raw data from file
     def loadDataset(self, filename):
+        &#34;&#34;&#34;
+        Load raw data from file
+        &#34;&#34;&#34;
         self.dataset = pd.read_csv(filename)
         self.dataset_open = True
 
-    # Encode an utterance through the lookup dictionary
     def encode(self, utterances):
+        &#34;&#34;&#34;
+        Encode an utterance through the lookup dictionary
+        &#34;&#34;&#34;
         encoded_utterances = []
         for utterance in utterances:
             obs = []
@@ -200,8 +225,10 @@ class PreProcessedDataset:
             encoded_utterances.append(np.array(obs))
         return np.array(encoded_utterances)
 
-    # Setup the lookup dictionary through frequency encoding
     def _setupEncode(self):
+        &#34;&#34;&#34;
+        Setup the lookup dictionary through frequency encoding
+        &#34;&#34;&#34;
         word_counts = {}
         for index, row in self.annotated_data.iterrows():
             words = row[&#39;Thread&#39;].split(&#34; &#34;)
@@ -210,6 +237,7 @@ class PreProcessedDataset:
                     word_counts[word] = word_counts[word] + 1
                 else:
                     word_counts[word] = 1
+
         # Sort the words to generate code
         # Lower number : higher count
         # 0 - Padding, 1 - End, 2 - Missing
@@ -224,8 +252,10 @@ class PreProcessedDataset:
                 break
         self.encode_ready = True
 
-    # Get all utterances by parsing dictionary for each pull
     def _getObsResUsers(self):
+        &#34;&#34;&#34;
+        Get all utterances by parsing dictionary for each pull
+        &#34;&#34;&#34;
         all_utterances = []
         for index, row in self.full_dataset.iterrows():
             utterances = []
@@ -234,17 +264,21 @@ class PreProcessedDataset:
             users.append(row[&#39;User&#39;])
             temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
             temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
+
             if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
                 all_comments = temp_df_comments.append(temp_df_review_comments)
                 all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
                 all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])
+
                 for comment_index, comment_row in all_comments.iterrows():
                     utterances.append(comment_row[&#39;Body&#39;])
                     users.append(comment_row[&#39;User&#39;])
+
             all_utterances.append(utterances)
             self.all_users.append(users)
             self.results[&#39;Constructive&#39;].append(row[&#39;Constructive&#39;])
             self.results[&#39;Inclusive&#39;].append(row[&#39;Inclusive&#39;])
+
         return all_utterances</code></pre>
 </details>
 </section>
@@ -262,14 +296,16 @@ class PreProcessedDataset:
 <span>(</span><span>vocab_size=1000, no_tokens=512, max_pull_length=100)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set flags and instance variables in constructor</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PreProcessedDataset:
-    # Set flags and instance variables in constructor
     def __init__(self, vocab_size=1000, no_tokens=512, max_pull_length=100):
+        &#34;&#34;&#34;
+        Set flags and instance variables in constructor
+        &#34;&#34;&#34;
         self.annotated_data = None
         self.dataset = None
         self.full_dataset = None
@@ -289,8 +325,11 @@ class PreProcessedDataset:
         self.full_dataset_ready = False
         self.encode_ready = False
 
-    # Setup the preprocessed dataset
     def setupPreProcess(self, annotated_filename, dataset_filename):
+        &#34;&#34;&#34;
+        Setup the preprocessed dataset
+        &#34;&#34;&#34;
+
         # Load datasets
         self.loadAnnotatedData(annotated_filename)
         self.loadDataset(dataset_filename)
@@ -309,8 +348,11 @@ class PreProcessedDataset:
         self.full_dataset[&#39;Review_Comments&#39;] = self.full_dataset[&#39;Review_Comments&#39;].apply(
             lambda comment: stringToDict(comment))
 
-    # Encode all utterances
     def encodeData(self):
+        &#34;&#34;&#34;
+        Encode all utterances
+        &#34;&#34;&#34;
+
         all_utterances = self._getObsResUsers()
         # Encode each utterance
         for utterances in all_utterances:
@@ -328,8 +370,11 @@ class PreProcessedDataset:
             self.results[&#39;Inclusive&#39;] = self.results[&#39;Inclusive&#39;][:idx] + self.results[&#39;Inclusive&#39;][idx + 1:]
         self.curr_max_length = max([len(x) for x in self.all_encoded_utterances])
 
-    # Get matrix observation and results for ML task soutcome = Inclusive, Constructive, or None -&gt; both 
     def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+        &#34;&#34;&#34;
+        Get matrix observation and results for ML task outcome = Inclusive, Constructive, or None -&gt; both
+        &#34;&#34;&#34;
+
         obs = []
         for i in range(len(self.all_encoded_utterances)):
             def pad(inp):
@@ -346,17 +391,21 @@ class PreProcessedDataset:
         res = self.getRes(outcome)
         return obs, res
 
-    # Get stacked matrix observation and results for ML task 
     def getRoleMatrix(self, outcome=None, padPull=True):
+        &#34;&#34;&#34;
+        Get stacked matrix observation and results for ML task
+        &#34;&#34;&#34;
         # Check if results must be padded to same length for each pull
         if padPull:
             # Author and reviwer layers
             layer_writer = []
             layer_reviewer = []
+
             for i in range(len(self.all_encoded_utterances)):
                 writer_comments = []
                 reviewer_comments = []
                 writer = self.all_users[i][0]
+
                 for j in range(len(self.all_encoded_utterances[i])):
                     # Check if author or reviewer
                     if self.all_users[i][j] == writer:
@@ -366,12 +415,14 @@ class PreProcessedDataset:
                         reviewer_comments.append(self.all_encoded_utterances[i][j])
                         writer_comments.append(np.zeros(self.no_tokens))
                     padding = [0] * self.no_tokens
+
                     # Pad both reviewer and writer layers
                     while len(writer_comments) &lt; self.curr_max_length:
                         writer_comments.append(padding.copy())
                         reviewer_comments.append(padding.copy())
                     layer_writer.append(np.array(writer_comments))
                     layer_reviewer.append(np.array(reviewer_comments))
+
             # Stack reviwer and author matrices
             obs = np.stack((layer_writer, layer_reviewer), axis=3)
             res = self.getRes(outcome)
@@ -382,6 +433,7 @@ class PreProcessedDataset:
                 writer_comments = []
                 reviewer_comments = []
                 writer = self.all_users[i][0]
+
                 for j in range(len(self.all_encoded_utterances[i])):
                     if self.all_users[i][j] == writer:
                         writer_comments.append(self.all_encoded_utterances[i][j])
@@ -394,24 +446,32 @@ class PreProcessedDataset:
             res = self.getRes(outcome)
             return obs, res
 
-    # Get list of results
     def getRes(self, outcome=None):
+        &#34;&#34;&#34;
+        Get list of results
+        &#34;&#34;&#34;
         if outcome:
             return self.results[outcome]
         return pd.DataFrame(data=self.results)
 
-    # Load annotated dataset from file
     def loadAnnotatedData(self, filename):
+        &#34;&#34;&#34;
+        Load annotated dataset from file
+        &#34;&#34;&#34;
         self.annotated_data = pd.read_csv(filename)
         self.annotated_data_open = True
 
-    # Load raw data from file
     def loadDataset(self, filename):
+        &#34;&#34;&#34;
+        Load raw data from file
+        &#34;&#34;&#34;
         self.dataset = pd.read_csv(filename)
         self.dataset_open = True
 
-    # Encode an utterance through the lookup dictionary
     def encode(self, utterances):
+        &#34;&#34;&#34;
+        Encode an utterance through the lookup dictionary
+        &#34;&#34;&#34;
         encoded_utterances = []
         for utterance in utterances:
             obs = []
@@ -430,8 +490,10 @@ class PreProcessedDataset:
             encoded_utterances.append(np.array(obs))
         return np.array(encoded_utterances)
 
-    # Setup the lookup dictionary through frequency encoding
     def _setupEncode(self):
+        &#34;&#34;&#34;
+        Setup the lookup dictionary through frequency encoding
+        &#34;&#34;&#34;
         word_counts = {}
         for index, row in self.annotated_data.iterrows():
             words = row[&#39;Thread&#39;].split(&#34; &#34;)
@@ -440,6 +502,7 @@ class PreProcessedDataset:
                     word_counts[word] = word_counts[word] + 1
                 else:
                     word_counts[word] = 1
+
         # Sort the words to generate code
         # Lower number : higher count
         # 0 - Padding, 1 - End, 2 - Missing
@@ -454,8 +517,10 @@ class PreProcessedDataset:
                 break
         self.encode_ready = True
 
-    # Get all utterances by parsing dictionary for each pull
     def _getObsResUsers(self):
+        &#34;&#34;&#34;
+        Get all utterances by parsing dictionary for each pull
+        &#34;&#34;&#34;
         all_utterances = []
         for index, row in self.full_dataset.iterrows():
             utterances = []
@@ -464,17 +529,21 @@ class PreProcessedDataset:
             users.append(row[&#39;User&#39;])
             temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
             temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
+
             if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
                 all_comments = temp_df_comments.append(temp_df_review_comments)
                 all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
                 all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])
+
                 for comment_index, comment_row in all_comments.iterrows():
                     utterances.append(comment_row[&#39;Body&#39;])
                     users.append(comment_row[&#39;User&#39;])
+
             all_utterances.append(utterances)
             self.all_users.append(users)
             self.results[&#39;Constructive&#39;].append(row[&#39;Constructive&#39;])
             self.results[&#39;Inclusive&#39;].append(row[&#39;Inclusive&#39;])
+
         return all_utterances</code></pre>
 </details>
 <h3>Methods</h3>
@@ -483,12 +552,15 @@ class PreProcessedDataset:
 <span>def <span class="ident">encode</span></span>(<span>self, utterances)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Encode an utterance through the lookup dictionary</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def encode(self, utterances):
+    &#34;&#34;&#34;
+    Encode an utterance through the lookup dictionary
+    &#34;&#34;&#34;
     encoded_utterances = []
     for utterance in utterances:
         obs = []
@@ -512,12 +584,16 @@ class PreProcessedDataset:
 <span>def <span class="ident">encodeData</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Encode all utterances</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def encodeData(self):
+    &#34;&#34;&#34;
+    Encode all utterances
+    &#34;&#34;&#34;
+
     all_utterances = self._getObsResUsers()
     # Encode each utterance
     for utterances in all_utterances:
@@ -540,12 +616,15 @@ class PreProcessedDataset:
 <span>def <span class="ident">getRes</span></span>(<span>self, outcome=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get list of results</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getRes(self, outcome=None):
+    &#34;&#34;&#34;
+    Get list of results
+    &#34;&#34;&#34;
     if outcome:
         return self.results[outcome]
     return pd.DataFrame(data=self.results)</code></pre>
@@ -555,12 +634,16 @@ class PreProcessedDataset:
 <span>def <span class="ident">getRoleAgnosticMatrix</span></span>(<span>self, outcome=None, padPull=True)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get matrix observation and results for ML task outcome = Inclusive, Constructive, or None -&gt; both</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getRoleAgnosticMatrix(self, outcome=None, padPull=True):
+    &#34;&#34;&#34;
+    Get matrix observation and results for ML task outcome = Inclusive, Constructive, or None -&gt; both
+    &#34;&#34;&#34;
+
     obs = []
     for i in range(len(self.all_encoded_utterances)):
         def pad(inp):
@@ -582,21 +665,26 @@ class PreProcessedDataset:
 <span>def <span class="ident">getRoleMatrix</span></span>(<span>self, outcome=None, padPull=True)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get stacked matrix observation and results for ML task</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getRoleMatrix(self, outcome=None, padPull=True):
+    &#34;&#34;&#34;
+    Get stacked matrix observation and results for ML task
+    &#34;&#34;&#34;
     # Check if results must be padded to same length for each pull
     if padPull:
         # Author and reviwer layers
         layer_writer = []
         layer_reviewer = []
+
         for i in range(len(self.all_encoded_utterances)):
             writer_comments = []
             reviewer_comments = []
             writer = self.all_users[i][0]
+
             for j in range(len(self.all_encoded_utterances[i])):
                 # Check if author or reviewer
                 if self.all_users[i][j] == writer:
@@ -606,12 +694,14 @@ class PreProcessedDataset:
                     reviewer_comments.append(self.all_encoded_utterances[i][j])
                     writer_comments.append(np.zeros(self.no_tokens))
                 padding = [0] * self.no_tokens
+
                 # Pad both reviewer and writer layers
                 while len(writer_comments) &lt; self.curr_max_length:
                     writer_comments.append(padding.copy())
                     reviewer_comments.append(padding.copy())
                 layer_writer.append(np.array(writer_comments))
                 layer_reviewer.append(np.array(reviewer_comments))
+
         # Stack reviwer and author matrices
         obs = np.stack((layer_writer, layer_reviewer), axis=3)
         res = self.getRes(outcome)
@@ -622,6 +712,7 @@ class PreProcessedDataset:
             writer_comments = []
             reviewer_comments = []
             writer = self.all_users[i][0]
+
             for j in range(len(self.all_encoded_utterances[i])):
                 if self.all_users[i][j] == writer:
                     writer_comments.append(self.all_encoded_utterances[i][j])
@@ -639,12 +730,15 @@ class PreProcessedDataset:
 <span>def <span class="ident">loadAnnotatedData</span></span>(<span>self, filename)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Load annotated dataset from file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def loadAnnotatedData(self, filename):
+    &#34;&#34;&#34;
+    Load annotated dataset from file
+    &#34;&#34;&#34;
     self.annotated_data = pd.read_csv(filename)
     self.annotated_data_open = True</code></pre>
 </details>
@@ -653,12 +747,15 @@ class PreProcessedDataset:
 <span>def <span class="ident">loadDataset</span></span>(<span>self, filename)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Load raw data from file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def loadDataset(self, filename):
+    &#34;&#34;&#34;
+    Load raw data from file
+    &#34;&#34;&#34;
     self.dataset = pd.read_csv(filename)
     self.dataset_open = True</code></pre>
 </details>
@@ -667,12 +764,16 @@ class PreProcessedDataset:
 <span>def <span class="ident">setupPreProcess</span></span>(<span>self, annotated_filename, dataset_filename)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Setup the preprocessed dataset</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def setupPreProcess(self, annotated_filename, dataset_filename):
+    &#34;&#34;&#34;
+    Setup the preprocessed dataset
+    &#34;&#34;&#34;
+
     # Load datasets
     self.loadAnnotatedData(annotated_filename)
     self.loadDataset(dataset_filename)
