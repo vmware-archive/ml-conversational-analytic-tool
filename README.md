@@ -23,6 +23,7 @@ inclusive pull requests to foster a healthier open source community.
     2. [Build Dataset](#build-dataset)
         - [Extract Raw Data from GitHub](#extract-raw-data-from-github)
         - [Annotate](#annotate)
+        - [Feature Vector Creation](#feature-vector-creation)
     3. [Train models](#train-models)
 4. [Documentation](#documentation)
 5. [Blog Posts](#blog-posts)
@@ -102,19 +103,31 @@ python ./ml-conversational-analytic-tool/runDataExtraction.py <organization> <re
 
 #### Annotate
 
-`featureVector.py` prepares your data for annotation use. Run the script by passing in path to `rawdatafile` and `words`.
+`github_data.py` prepares your data for annotation use. Run the script by passing in path to `rawdatafile`.
 
 ```python
-python ./ml-conversational-analytic-tool/featureVector.py <rawdatafile> <words> -unannotated
+python ./ml-conversational-analytic-tool/github_data.py <rawdatafile> --name <output_filename>
 ```
 
 - `rawdatafile` is location of raw data csv
-- `words` is location of file with lookup words (not needed for annotation purposes)
-- (optional) `-unannotated` is an optional flag to generate data for annotation
+- `name` (optional) is the output filename.
 
-To annotate the raw data extracted we recommend using
-[Data Annotator For Machine Learning](https://github.com/vmware/data-annotator-for-machine-learning). The quality of
-the data and the model very much depends on annotation best practices.
+
+The quality of the data and the model very much depends on annotation best practices.
+    To annotate the raw data extracted we recommend using
+    [Data Annotator For Machine Learning](https://github.com/vmware/data-annotator-for-machine-learning). 
+
+
+#### Feature Vector Creation 
+`featureVector.py` creates feature vector based on the `rawdatafile` and optionally `words` file. Default features 
+include sentiment and code blocks. `Words` file contains words important in measuring inclusiveness and 
+constructiveness. This functionality could be used instead of manual annotation.
+
+```python
+python ./ml-conversational-analytic-tool/featureVector.py <rawdatafile> --words <words_filename> --name <output_filename>
+```
+- `words` (optional) path to the words file
+- `name`  (optional) name of the output file.
 
 ### Train models
 
