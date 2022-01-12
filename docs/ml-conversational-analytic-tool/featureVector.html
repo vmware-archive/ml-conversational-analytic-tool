@@ -28,14 +28,16 @@
 </summary>
 <pre><code class="python"># Copyright 2021 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
-
 import argparse
-import ast
 import os
+from pathlib import Path
 
 import pandas as pd
 
+import utils
 from commentAnalysis import CommentAnalyzer
+
+FILE_NAME_SUFFIX = &#34;_annotated&#34;
 
 
 class Featurizer:
@@ -59,17 +61,10 @@ class Featurizer:
         self.raw_filename = filename
         self.raw_data = pd.read_csv(filename)
 
-        # Temporary method to convert json strings to dictionary
-        def stringToDict(string):
-            string = ast.literal_eval(string)
-            for i in range(len(string)):
-                string[i] = ast.literal_eval(string[i])
-            return string
-
         # Convert Comments and Review Comments to dictionary
-        self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
-        self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(lambda comment: stringToDict(comment))
-        print(&#34;Done reading raw data.&#34;)
+        self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: utils.string_to_dict(comment))
+        self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(
+            lambda comment: utils.string_to_dict(comment))
 
     def setupCommentAnalyzer(self, filename):
         &#34;&#34;&#34;
@@ -79,13 +74,14 @@ class Featurizer:
         word_list = []
 
         # Open file to obtain list of words in Comment Analzyer
-        with open(filename, &#39;r&#39;) as wordFile:
-            word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
+        if filename:
+            with open(filename, &#39;r&#39;) as wordFile:
+                word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
         self.commentAnalyzer = CommentAnalyzer(word_list)
         self.analysis_features = self.analysis_features + word_list
         print(&#34;Comment Analyzer Setup&#34;)
 
-    def formFeatures(self, export_filename=&#34;&#34;, export=True):
+    def formFeatures(self):
         &#34;&#34;&#34;
         Function to create/export dataset with desired features
         Inputs: Name of file to export (string), export flag (boolean)
@@ -171,81 +167,29 @@ class Featurizer:
             # Add pull features to list of row features
             features.append(row_features)
         export_df = pd.DataFrame(data=features)
-
-        if export:
-            if not os.path.exists(&#39;exports&#39;):
-                os.mkdir(&#39;exports&#39;)
-            if export_filename == &#34;&#34;:
-                export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-            else:
-                export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
-
-        return export_df
-
-    def pullStringConversation(self, export_filename=&#34;&#34;, export=True):
-        &#34;&#34;&#34;
-        Function to form conversation string given communication on a pull request
-        Inputs: Name of file to export (string), export flag (boolean)
-        &#34;&#34;&#34;
-
-        # Store each interaction and pull URL for export
-        string_conversations = []
-        pull_urls = []
-        pull_numbers = []
-
-        for index, row in self.raw_data.iterrows():
-            # Make pull message
-            conversation = &#34;{} ({}) : {}\n{}&#34;.format(row[&#34;User&#34;], row[&#34;Created_At&#34;], row[&#34;Title&#34;], row[&#34;Body&#34;])
-            temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
-            temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
-
-            if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
-                all_comments = temp_df_comments.append(temp_df_review_comments)
-                all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
-                all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])  # Sort data so as to export in order
-
-                for comment_index, comment_row in all_comments.iterrows():
-                    conversation = conversation + &#34;\n{} ({}) : {}&#34;.format(comment_row[&#34;User&#34;],
-                                                                          comment_row[&#34;Created_At&#34;],
-                                                                          comment_row[&#34;Body&#34;])
-            string_conversations.append(conversation.encode(&#34;ascii&#34;, &#34;ignore&#34;).decode())
-            pull_urls.append(row[&#34;URL&#34;])
-            pull_numbers.append(row[&#34;Number&#34;])
-
-        # Export converation field dataset
-        export_df = pd.DataFrame()
-        export_df[&#34;Number&#34;] = pull_numbers
-        export_df[&#34;URL&#34;] = pull_urls
-        export_df[&#34;Thread&#34;] = string_conversations
-
-        if export:
-            if not os.path.exists(&#39;exports&#39;):
-                os.mkdir(&#39;exports&#39;)
-            if export_filename == &#34;&#34;:
-                export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-            else:
-                export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
         return export_df
 
 
 if __name__ == &#34;__main__&#34;:
     parser = argparse.ArgumentParser(description=&#39;Form features from raw data.&#39;)
     parser.add_argument(&#39;rawdatafile&#39;, help=&#39;Raw Data Filename&#39;)
-    parser.add_argument(&#39;words&#39;, help=&#39;File containing words to count&#39;)
-    parser.add_argument(&#39;-unannotated&#39;, action=&#39;store_true&#39;, default=False, help=&#39;Create file for annotation&#39;)
+    parser.add_argument(&#39;-w&#39;, &#39;--words&#39;, required=False, help=&#39;File containing words to count&#39;)
+    parser.add_argument(&#39;-n&#39;, &#39;--name&#39;, required=False, help=&#39;Output file name. If not specified, the name is &#39;
+                                                             &#39;constructed like this: &lt;rawdatafile&gt;{&#39;
+                                                             &#39;suffix}.csv&#39;.format(suffix=FILE_NAME_SUFFIX))
+
     args = parser.parse_args()
+
     RETAINED_FEATURES = [&#34;Number&#34;, &#34;URL&#34;, &#34;Title&#34;, &#34;State&#34;, &#34;Body&#34;, &#34;Deletions&#34;, &#34;Additions&#34;, &#34;User&#34;, &#34;Comments_Num&#34;,
                          &#34;Commits_Num&#34;, &#34;Created_At&#34;, &#34;Closed_At&#34;, &#34;Merged&#34;, &#34;Merged_At&#34;, &#34;Review_Comments_Num&#34;]
     COMMENT_ANALYSIS_FEATURES = [&#34;Sentiment&#34;, &#34;Code Blocks&#34;]
+
     featurizer = Featurizer(RETAINED_FEATURES, COMMENT_ANALYSIS_FEATURES)
-
     featurizer.readRawData(args.rawdatafile)
-
-    if args.unannotated:
-        featurizer.pullStringConversation(&#39;unannotated.csv&#39;)
-    else:
-        featurizer.setupCommentAnalyzer(args.words)
-        featurizer.formFeatures()</code></pre>
+    featurizer.setupCommentAnalyzer(args.words)
+    df = featurizer.formFeatures()
+    file_name = utils.construct_file_name(args.name, args.rawdatafile, FILE_NAME_SUFFIX)
+    utils.export_to_cvs(df, file_name)</code></pre>
 </details>
 </section>
 <section>
@@ -289,17 +233,10 @@ Inputs: Retained Features (list) -&gt; pull data features, Analysis Features (li
         self.raw_filename = filename
         self.raw_data = pd.read_csv(filename)
 
-        # Temporary method to convert json strings to dictionary
-        def stringToDict(string):
-            string = ast.literal_eval(string)
-            for i in range(len(string)):
-                string[i] = ast.literal_eval(string[i])
-            return string
-
         # Convert Comments and Review Comments to dictionary
-        self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
-        self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(lambda comment: stringToDict(comment))
-        print(&#34;Done reading raw data.&#34;)
+        self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: utils.string_to_dict(comment))
+        self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(
+            lambda comment: utils.string_to_dict(comment))
 
     def setupCommentAnalyzer(self, filename):
         &#34;&#34;&#34;
@@ -309,13 +246,14 @@ Inputs: Retained Features (list) -&gt; pull data features, Analysis Features (li
         word_list = []
 
         # Open file to obtain list of words in Comment Analzyer
-        with open(filename, &#39;r&#39;) as wordFile:
-            word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
+        if filename:
+            with open(filename, &#39;r&#39;) as wordFile:
+                word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
         self.commentAnalyzer = CommentAnalyzer(word_list)
         self.analysis_features = self.analysis_features + word_list
         print(&#34;Comment Analyzer Setup&#34;)
 
-    def formFeatures(self, export_filename=&#34;&#34;, export=True):
+    def formFeatures(self):
         &#34;&#34;&#34;
         Function to create/export dataset with desired features
         Inputs: Name of file to export (string), export flag (boolean)
@@ -401,66 +339,12 @@ Inputs: Retained Features (list) -&gt; pull data features, Analysis Features (li
             # Add pull features to list of row features
             features.append(row_features)
         export_df = pd.DataFrame(data=features)
-
-        if export:
-            if not os.path.exists(&#39;exports&#39;):
-                os.mkdir(&#39;exports&#39;)
-            if export_filename == &#34;&#34;:
-                export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-            else:
-                export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
-
-        return export_df
-
-    def pullStringConversation(self, export_filename=&#34;&#34;, export=True):
-        &#34;&#34;&#34;
-        Function to form conversation string given communication on a pull request
-        Inputs: Name of file to export (string), export flag (boolean)
-        &#34;&#34;&#34;
-
-        # Store each interaction and pull URL for export
-        string_conversations = []
-        pull_urls = []
-        pull_numbers = []
-
-        for index, row in self.raw_data.iterrows():
-            # Make pull message
-            conversation = &#34;{} ({}) : {}\n{}&#34;.format(row[&#34;User&#34;], row[&#34;Created_At&#34;], row[&#34;Title&#34;], row[&#34;Body&#34;])
-            temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
-            temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
-
-            if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
-                all_comments = temp_df_comments.append(temp_df_review_comments)
-                all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
-                all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])  # Sort data so as to export in order
-
-                for comment_index, comment_row in all_comments.iterrows():
-                    conversation = conversation + &#34;\n{} ({}) : {}&#34;.format(comment_row[&#34;User&#34;],
-                                                                          comment_row[&#34;Created_At&#34;],
-                                                                          comment_row[&#34;Body&#34;])
-            string_conversations.append(conversation.encode(&#34;ascii&#34;, &#34;ignore&#34;).decode())
-            pull_urls.append(row[&#34;URL&#34;])
-            pull_numbers.append(row[&#34;Number&#34;])
-
-        # Export converation field dataset
-        export_df = pd.DataFrame()
-        export_df[&#34;Number&#34;] = pull_numbers
-        export_df[&#34;URL&#34;] = pull_urls
-        export_df[&#34;Thread&#34;] = string_conversations
-
-        if export:
-            if not os.path.exists(&#39;exports&#39;):
-                os.mkdir(&#39;exports&#39;)
-            if export_filename == &#34;&#34;:
-                export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-            else:
-                export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
         return export_df</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="ml-conversational-analytic-tool.featureVector.Featurizer.formFeatures"><code class="name flex">
-<span>def <span class="ident">formFeatures</span></span>(<span>self, export_filename='', export=True)</span>
+<span>def <span class="ident">formFeatures</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Function to create/export dataset with desired features
@@ -469,7 +353,7 @@ Inputs: Name of file to export (string), export flag (boolean)</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def formFeatures(self, export_filename=&#34;&#34;, export=True):
+<pre><code class="python">def formFeatures(self):
     &#34;&#34;&#34;
     Function to create/export dataset with desired features
     Inputs: Name of file to export (string), export flag (boolean)
@@ -555,71 +439,6 @@ Inputs: Name of file to export (string), export flag (boolean)</p></div>
         # Add pull features to list of row features
         features.append(row_features)
     export_df = pd.DataFrame(data=features)
-
-    if export:
-        if not os.path.exists(&#39;exports&#39;):
-            os.mkdir(&#39;exports&#39;)
-        if export_filename == &#34;&#34;:
-            export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-        else:
-            export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
-
-    return export_df</code></pre>
-</details>
-</dd>
-<dt id="ml-conversational-analytic-tool.featureVector.Featurizer.pullStringConversation"><code class="name flex">
-<span>def <span class="ident">pullStringConversation</span></span>(<span>self, export_filename='', export=True)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Function to form conversation string given communication on a pull request
-Inputs: Name of file to export (string), export flag (boolean)</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pullStringConversation(self, export_filename=&#34;&#34;, export=True):
-    &#34;&#34;&#34;
-    Function to form conversation string given communication on a pull request
-    Inputs: Name of file to export (string), export flag (boolean)
-    &#34;&#34;&#34;
-
-    # Store each interaction and pull URL for export
-    string_conversations = []
-    pull_urls = []
-    pull_numbers = []
-
-    for index, row in self.raw_data.iterrows():
-        # Make pull message
-        conversation = &#34;{} ({}) : {}\n{}&#34;.format(row[&#34;User&#34;], row[&#34;Created_At&#34;], row[&#34;Title&#34;], row[&#34;Body&#34;])
-        temp_df_comments = pd.DataFrame(row[&#39;Comments&#39;])
-        temp_df_review_comments = pd.DataFrame(row[&#34;Review_Comments&#34;])
-
-        if len(temp_df_comments) &gt; 0 or len(temp_df_review_comments) &gt; 0:
-            all_comments = temp_df_comments.append(temp_df_review_comments)
-            all_comments[&#39;Created_At&#39;] = pd.to_datetime(all_comments[&#39;Created_At&#39;])
-            all_comments = all_comments.sort_values(by=[&#39;Created_At&#39;])  # Sort data so as to export in order
-
-            for comment_index, comment_row in all_comments.iterrows():
-                conversation = conversation + &#34;\n{} ({}) : {}&#34;.format(comment_row[&#34;User&#34;],
-                                                                      comment_row[&#34;Created_At&#34;],
-                                                                      comment_row[&#34;Body&#34;])
-        string_conversations.append(conversation.encode(&#34;ascii&#34;, &#34;ignore&#34;).decode())
-        pull_urls.append(row[&#34;URL&#34;])
-        pull_numbers.append(row[&#34;Number&#34;])
-
-    # Export converation field dataset
-    export_df = pd.DataFrame()
-    export_df[&#34;Number&#34;] = pull_numbers
-    export_df[&#34;URL&#34;] = pull_urls
-    export_df[&#34;Thread&#34;] = string_conversations
-
-    if export:
-        if not os.path.exists(&#39;exports&#39;):
-            os.mkdir(&#39;exports&#39;)
-        if export_filename == &#34;&#34;:
-            export_df.to_csv(&#34;exports/&#34; + self.raw_filename + &#34;_analysis.csv&#34;, index=False)
-        else:
-            export_df.to_csv(&#34;exports/&#34; + export_filename, index=False)
     return export_df</code></pre>
 </details>
 </dd>
@@ -641,17 +460,10 @@ Inputs: File location (string) -&gt; input raw data file location</p></div>
     self.raw_filename = filename
     self.raw_data = pd.read_csv(filename)
 
-    # Temporary method to convert json strings to dictionary
-    def stringToDict(string):
-        string = ast.literal_eval(string)
-        for i in range(len(string)):
-            string[i] = ast.literal_eval(string[i])
-        return string
-
     # Convert Comments and Review Comments to dictionary
-    self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: stringToDict(comment))
-    self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(lambda comment: stringToDict(comment))
-    print(&#34;Done reading raw data.&#34;)</code></pre>
+    self.raw_data[&#39;Comments&#39;] = self.raw_data[&#39;Comments&#39;].apply(lambda comment: utils.string_to_dict(comment))
+    self.raw_data[&#39;Review_Comments&#39;] = self.raw_data[&#39;Review_Comments&#39;].apply(
+        lambda comment: utils.string_to_dict(comment))</code></pre>
 </details>
 </dd>
 <dt id="ml-conversational-analytic-tool.featureVector.Featurizer.setupCommentAnalyzer"><code class="name flex">
@@ -672,8 +484,9 @@ Inputs: File location (string) -&gt; .txt containing keywords to count</p></div>
     word_list = []
 
     # Open file to obtain list of words in Comment Analzyer
-    with open(filename, &#39;r&#39;) as wordFile:
-        word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
+    if filename:
+        with open(filename, &#39;r&#39;) as wordFile:
+            word_list = wordFile.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#39;,&#39;)
     self.commentAnalyzer = CommentAnalyzer(word_list)
     self.analysis_features = self.analysis_features + word_list
     print(&#34;Comment Analyzer Setup&#34;)</code></pre>
@@ -701,7 +514,6 @@ Inputs: File location (string) -&gt; .txt containing keywords to count</p></div>
 <h4><code><a title="ml-conversational-analytic-tool.featureVector.Featurizer" href="#ml-conversational-analytic-tool.featureVector.Featurizer">Featurizer</a></code></h4>
 <ul class="">
 <li><code><a title="ml-conversational-analytic-tool.featureVector.Featurizer.formFeatures" href="#ml-conversational-analytic-tool.featureVector.Featurizer.formFeatures">formFeatures</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.featureVector.Featurizer.pullStringConversation" href="#ml-conversational-analytic-tool.featureVector.Featurizer.pullStringConversation">pullStringConversation</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.featureVector.Featurizer.readRawData" href="#ml-conversational-analytic-tool.featureVector.Featurizer.readRawData">readRawData</a></code></li>
 <li><code><a title="ml-conversational-analytic-tool.featureVector.Featurizer.setupCommentAnalyzer" href="#ml-conversational-analytic-tool.featureVector.Featurizer.setupCommentAnalyzer">setupCommentAnalyzer</a></code></li>
 </ul>

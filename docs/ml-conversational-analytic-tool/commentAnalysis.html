@@ -32,9 +32,9 @@
 import argparse
 
 import nltk
+from nltk.sentiment import vader
 
 nltk.download(&#39;vader_lexicon&#39;)  # Model download
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
 class CommentAnalyzer:
@@ -44,7 +44,7 @@ class CommentAnalyzer:
         Parameters: words - list of words to count
         &#34;&#34;&#34;
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
-        self.vader_sentiment = SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
+        self.vader_sentiment = vader.SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
 
     def analyzeComment(self, comment):
         &#34;&#34;&#34;
@@ -66,6 +66,8 @@ class CommentAnalyzer:
         Parameters: text - string.
         Returns: string after cleaning
         &#34;&#34;&#34;
+        if not isinstance(text, str):
+            return &#34;&#34;
         cleaned_text = text.strip()  # Remove trailing and starting spaces
         cleaned_text = cleaned_text.lower()  # Convert to lowercase
         return cleaned_text
@@ -112,13 +114,14 @@ class CommentAnalyzer:
 if __name__ == &#34;__main__&#34;:
     parser = argparse.ArgumentParser(description=&#39;Analyze input text segment.&#39;)
     parser.add_argument(&#39;text&#39;, help=&#39;Text to analyze&#39;)
-    parser.add_argument(&#39;words&#39;, help=&#39;File containing words to count&#39;)
+    parser.add_argument(&#39;-w&#39;, &#39;--words&#39;, required=False, help=&#39;File containing words to count&#39;)
 
     args = parser.parse_args()
     # Form word list through the file
     word_list = []
-    with open(args.words, &#39;r&#39;) as word_file:
-        word_list = word_file.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#34;,&#34;)
+    if args.words:
+        with open(args.words, &#39;r&#39;) as word_file:
+            word_list = word_file.read().replace(&#34; &#34;, &#34;&#34;).strip().split(&#34;,&#34;)
     analyzer = CommentAnalyzer(word_list)
     print(analyzer.analyzeComment(args.text))</code></pre>
 </details>
@@ -150,7 +153,7 @@ Parameters: words - list of words to count</p></div>
         Parameters: words - list of words to count
         &#34;&#34;&#34;
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
-        self.vader_sentiment = SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
+        self.vader_sentiment = vader.SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
 
     def analyzeComment(self, comment):
         &#34;&#34;&#34;
@@ -172,6 +175,8 @@ Parameters: words - list of words to count</p></div>
         Parameters: text - string.
         Returns: string after cleaning
         &#34;&#34;&#34;
+        if not isinstance(text, str):
+            return &#34;&#34;
         cleaned_text = text.strip()  # Remove trailing and starting spaces
         cleaned_text = cleaned_text.lower()  # Convert to lowercase
         return cleaned_text
@@ -342,6 +347,8 @@ Returns: string after cleaning</p></div>
     Parameters: text - string.
     Returns: string after cleaning
     &#34;&#34;&#34;
+    if not isinstance(text, str):
+        return &#34;&#34;
     cleaned_text = text.strip()  # Remove trailing and starting spaces
     cleaned_text = cleaned_text.lower()  # Convert to lowercase
     return cleaned_text</code></pre>
