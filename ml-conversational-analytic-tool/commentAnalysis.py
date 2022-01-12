@@ -4,9 +4,9 @@
 import argparse
 
 import nltk
+from nltk.sentiment import vader
 
 nltk.download('vader_lexicon')  # Model download
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
 class CommentAnalyzer:
@@ -16,7 +16,7 @@ class CommentAnalyzer:
         Parameters: words - list of words to count
         """
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
-        self.vader_sentiment = SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
+        self.vader_sentiment = vader.SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
 
     def analyzeComment(self, comment):
         """
@@ -38,6 +38,8 @@ class CommentAnalyzer:
         Parameters: text - string.
         Returns: string after cleaning
         """
+        if not isinstance(text, str):
+            return ""
         cleaned_text = text.strip()  # Remove trailing and starting spaces
         cleaned_text = cleaned_text.lower()  # Convert to lowercase
         return cleaned_text
@@ -84,12 +86,13 @@ class CommentAnalyzer:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Analyze input text segment.')
     parser.add_argument('text', help='Text to analyze')
-    parser.add_argument('words', help='File containing words to count')
+    parser.add_argument('-w', '--words', required=False, help='File containing words to count')
 
     args = parser.parse_args()
     # Form word list through the file
     word_list = []
-    with open(args.words, 'r') as word_file:
-        word_list = word_file.read().replace(" ", "").strip().split(",")
+    if args.words:
+        with open(args.words, 'r') as word_file:
+            word_list = word_file.read().replace(" ", "").strip().split(",")
     analyzer = CommentAnalyzer(word_list)
     print(analyzer.analyzeComment(args.text))
