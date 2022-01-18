@@ -9,7 +9,7 @@ import pandas as pd
 import utils
 from commentAnalysis import CommentAnalyzer
 
-FILE_NAME_SUFFIX = "_annotated"
+FILE_NAME_SUFFIX = "annotated"
 
 
 class Featurizer:

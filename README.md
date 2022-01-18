@@ -93,7 +93,7 @@ The libraries used within the project are available in the [requirements.txt](./
 
 #### Extract Raw Data from GitHub
 
-`runDataExtraction.py` extracts raw data from GitHub based on parameters passed in by the user. To successfully run the
+`githubDataExtraction.py` extracts raw data from GitHub based on parameters passed in by the user. To successfully run the
 script, a [GitHub access token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 is required and must be set as an environment variable.
 
@@ -105,14 +105,14 @@ before extracting data from a GitHub repo.
 export GITACCESS=<YOUR_TOKEN>
 ```
 
-Run the script by passing in `organization` and `repo`  
+Run the script by passing in `organization`
 ```python
-python ./ml-conversational-analytic-tool/runDataExtraction.py <organization> <repo>
+python ./ml-conversational-analytic-tool/githubDataExtraction.py <organization>
 ```
 
 - `organization` is the name of the repository owner
-- `repo` is the name of the repository; use 'all' to extract all repositories owned by organization
-- (optional) `-reactions` is an optional flag to extract comment and review reactions.
+- (optional) `--repo` is the name of the repository; extracts all repositories in organization if not included.
+- (optional) `--reactions` is an optional flag to extract comment and review reactions.
 
 #### Annotate
 

@@ -4,7 +4,7 @@ import pandas as pd
 
 import utils
 
-FILE_NAME_SUFFIX = "_unannotated"
+FILE_NAME_SUFFIX = "unannotated"
 
 
 class GitHubData:

@@ -9,6 +9,8 @@ import pandas as pd
 from github import Github
 from github.GithubException import RateLimitExceededException
 
+import utils
+
 
 class GithubDataExtractor:
     def __init__(self, access_token):
@@ -16,7 +18,7 @@ class GithubDataExtractor:
         Constructor requires an access token to start a Github session, and specifies instance variables
         """
         self.g_ses = Github(access_token)  # Github object is used as a channel to the Github API
-        self.current_repo = None  # Current Opended Repo
+        self.current_repo = None  # Current Opened Repo
         self.reaction_flag = False
         self.repo_opened = False  # Flag to store state of repo as opened (True) or closed (False)
         self.repo_name = ""
@@ -31,9 +33,9 @@ class GithubDataExtractor:
         self.repo_opened = True
         self.repo_name = repo_name
         self.organization = organization
-        print("Opened repo {} - {}".format(repo_name, organization))
+        print("Opened repo {}/{}".format(organization, repo_name))
 
-    def getAllPulls(self, name="", reaction_flag=False, export_to_csv=True):
+    def getAllPulls(self, reaction_flag=False):
         """
         Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
         export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
@@ -43,15 +45,7 @@ class GithubDataExtractor:
             pull_data = []
             pull_data.extend(self.getPullsByState('open'))  # Access all open pulls
             pull_data.extend(self.getPullsByState('closed'))  # Access all closed pulls
-            pull_df = pd.DataFrame(pull_data)  # Convert list of dictionaries to dataframe
-            if export_to_csv:  # Export to csv if flag is true
-                if not os.path.exists('exports'):
-                    os.mkdir('exports')
-                if name == "":  # Check if name is provided
-                    pull_df.to_csv("exports/" + self.organization + "_" + self.repo_name + ".csv")
-                else:
-                    pull_df.to_csv("exports/" + name)
-            return pull_df
+            return pd.DataFrame(pull_data)  # Return list of dictionaries converted to dataframe
         print("Please open a Repo")
 
     def getPullsByState(self, state):
@@ -158,20 +152,28 @@ class GithubDataExtractor:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create csv for all pulls in repo')
+    parser = argparse.ArgumentParser(description='Create CSV/s for all pulls in repo/s')
     parser.add_argument('organization', help='Organization the repo belongs to.')
-    parser.add_argument('reponame', help='Name of repo')
-    parser.add_argument('-reactions', action='store_true', default=False, help='Flag to extract reactions')
-    parser.add_argument('--filename', help='Name of file')
-    # parser.add_argument('accesstoken', help='Github access token')
+    parser.add_argument('-R', '--repo', help='Name of repo.')
+    parser.add_argument('--reactions', action='store_true', default=False, help='Flag to extract reactions')
+    parser.add_argument('-n', "--name", help='Output file name. If not specified, the name is constructed like this: '
+            '<organization>_<repo>.csv')
 
     args = parser.parse_args()
     ACCESS_TOKEN = os.environ["GITACCESS"]  # Access Github token from environment for security purposes
     extractor = GithubDataExtractor(ACCESS_TOKEN)  # Create object
-    extractor.openRepo(args.organization, args.reponame)  # Open repo
 
-    # Extract all pulls and export them to .csv
-    if args.filename:
-        extractor.getAllPulls(args.filename, args.reactions)
+    if args.repo is None:
+        # Extract data for all repositories in organization
+        repos = extractor.g_ses.get_organization(args.organization).get_repos()
+        for repo in repos:
+            extractor.openRepo(args.organization, repo.name)
+            df = extractor.getAllPulls(args.reactions)
+            file_name = utils.construct_file_name(None, args.organization, repo.name)
+            utils.export_to_cvs(df, file_name)
     else:
-        extractor.getAllPulls("", args.reactions)
+        # Extract data for an individual repository
+        extractor.openRepo(args.organization, args.repo)
+        df = extractor.getAllPulls(args.reactions)
+        file_name = utils.construct_file_name(args.name, args.organization, args.repo)
+        utils.export_to_cvs(df, file_name)
