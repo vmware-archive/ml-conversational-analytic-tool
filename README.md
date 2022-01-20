@@ -20,6 +20,7 @@ inclusive pull requests to foster a healthier open source community.
     1. [Environment Setup](#environment-setup)
         - [Prerequisites](#prerequisites)
         - [Installation](#installation)
+        - [Testing](#testing)
     2. [Build Dataset](#build-dataset)
         - [Extract Raw Data from GitHub](#extract-raw-data-from-github)
         - [Annotate](#annotate)
@@ -36,6 +37,7 @@ inclusive pull requests to foster a healthier open source community.
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Testing](#testing)
 
 #### Prerequisites
 
@@ -53,7 +55,7 @@ create isolated Python environment is recommended for this project.
 
 2. Set up ML Conversational Analytic Tool in a virtualenv
    ```python
-   python3 -m venv virtualenv-ml-conversational
+   python -m venv virtualenv-ml-conversational
    ```
 
 3. Activate the virtualenv
@@ -69,6 +71,17 @@ create isolated Python environment is recommended for this project.
 5. Install required python libraries by running the command below
    ```python
    pip install -r requirements.txt
+   ```
+#### Testing
+6. Run all unit tests
+   ```python
+   cd ml-conversational-analytic-tool
+   python -m unittest discover -s tests
+   ```
+7. Run an individual unit test
+   ```python
+   cd ml-conversational-analytic-tool
+   python -m unittest tests/<file_name>
    ```
 
 The libraries used within the project are available in the [requirements.txt](./requirements.txt).
@@ -160,7 +173,6 @@ Both `BaseCNN` and `BaseLSTM` also have prediction explanation mechanisms that c
 
 If you have ideas on how to improve the framework to assess text conversation for constructive and inclusive
 communication, we welcome your contributions!
-
 ## Documentation
 
 Auto-generated API documentation can be found in
