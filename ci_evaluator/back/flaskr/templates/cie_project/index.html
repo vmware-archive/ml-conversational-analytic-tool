@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="project_h">{% block title %}Welcome{% endblock %}</h1>
+  <a class="action" href="{{ url_for('cie_project.about') }}">About the Project</a>
+
+{% endblock %}
+
+{% block content %}
+  <p class="index-text">
+    Whether we know it or not, Open-Source software, such as 
+    <ul>
+      <li>Linux,</li>
+      <li>Kubernetes, </li>
+      <li>OpenSSL, </li>
+    </ul>  
+  </p> 
+  <p>and many others, are an integral part of today’s technological development 
+    across the globe. Given our increased dependence on them, we set out to gauge the health of 
+    these projects which are founded on community. </p>
+    <p class="index-text">We believe that a healthy project must be 
+    constructive and inclusive. The <b>Constructiveness & Inclusiveness Evaluator (CIE)</b> 
+    tool can be used to analyze a GitHub project. It examines each Pull Request (PR), evaluating 
+    its comments and associated meta data such as time from submission to first review, and time 
+    from submission to merge. Individual PR scores are combined to assign a project level score. A high 
+    scoring project is indicative of a better managed and more sustainable project, one where a newcomer 
+    may be more welcome, one that will grow in functionality and support and thus be a better candidate 
+    for adoption. </p>
+    <p class="index-text">We hope that newcomers and experts, startups, corporations, and foundations, small and large 
+    project developers, use  the CIE tool to better navigate the open source community, to inform their 
+    decision-making processes with regard to contributing, adopting, and funding open source projects.
+  </p>
+  <p class="index-text">
+    We provide 2 ways of evaluating projects as well as a list of evaluated and stored projects:
+    <ul>
+      <li>evaluate project by pull request,</li>
+      <li>evaluate project by year.</li>
+    </ul>
+  </p>
+  <p class="index-text">
+    Since evaluation takes much time and average person is not going to wait that long we encourage 
+    you to use pull request evaluation as it can be a sneak peek into the evaluation process in general.
+  </p>
+  <p class="index-text">
+    One of the main features we provide is evaluation by year, which can show how a particular project 
+    is changing over time.
+  </p>
+
+{% endblock %}

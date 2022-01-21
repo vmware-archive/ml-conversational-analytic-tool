@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="project_h">{% block title %}Score the GitHub project{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<p>
+    Please provide a GitHub link to the projec to evaluate 
+    any GitHub project by it's latest PR(s):
+</p>
+<p>
+  Evaluation of GitHub project by followinig project link: <br>
+</p>
+<p class="link">
+  {{project_link}}
+</p>
+<p class="year">
+  {{project_year}}
+</p>
+  {% block body %}
+    {{ pr_table|safe }}
+  {% endblock %}  
+  <p>
+      Evaluation of the Project: <br><br>
+      {% for item, val in project_prediction.items() %}
+        <div class="evaluate_result">{{item}} &mdash; {{val}} 
+          {% if item != "Comments evaluated" %}
+            %
+          {% endif %} 
+        </div>
+      {% endfor %}
+    </div>
+  </p>
+{% endblock %}

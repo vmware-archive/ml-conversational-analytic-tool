@@ -1,0 +1,5 @@
+FLASK_APP=flaskr/__init__.py
+FLASK_ENV=development
+FLASK_SECRET_KEY=dev
+DATABASE_URL=postgresql://postgres@postgres:5432/ci_project
+SERVICE_URL=http://ml:8001
