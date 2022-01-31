@@ -9,7 +9,7 @@ EXPORTS_DIR = "exports"
 
 def export_to_cvs(export_df: pd.DataFrame, name):
     """
-    Export DataFrame into csv file with name constructed based on the given name or default_name
+    Export DataFrame into csv file with given name
     """
 
     if not os.path.exists(EXPORTS_DIR):
@@ -21,14 +21,19 @@ def export_to_cvs(export_df: pd.DataFrame, name):
     print("Output file: ", os.path.abspath(file))
 
 
-def construct_file_name(name, raw_datafile, suffix):
+def construct_file_name(name, component_a, component_b, separator="_"):
+    """
+    Construct output file name if `name` is not provided explicitly.
+    File output name is constructed based on component_a, component_b and separator input parameters :
+    <component_a><separator><component_b>.csv
+    """
     if name:
         _, file_extension = os.path.splitext(name)
         if not file_extension:
             name = name + ".csv"
         return name
     else:
-        return Path(raw_datafile).stem + suffix + ".csv"
+        return "{}{}{}.csv".format(Path(component_a).stem, separator, component_b)
 
 
 def string_to_dict(string):
