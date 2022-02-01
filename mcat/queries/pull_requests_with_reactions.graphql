@@ -1,0 +1,68 @@
+# Copyright 2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+query PullRequests($owner: String!, $repo: String!, $cursor: String) {
+    repository(owner: $owner, name: $repo) {
+        name
+        pullRequests(first: 100, after: $cursor) {
+            nodes {
+                number
+                title
+                author {
+                    login
+                }
+                url
+                state
+                body
+                additions
+                deletions
+                comments(first: 50) {
+                    totalCount
+                    nodes {
+                        author {
+                            login
+                        }
+                        createdAt
+                        body
+                        updatedAt
+                        reactions(first:50) {
+                            nodes {
+                                content
+                                createdAt
+                                user {
+                                    login
+                                }
+                            }
+                        }
+                    }
+                }
+                commits {
+                    totalCount
+                }
+                createdAt
+                closedAt
+                merged
+                mergedAt
+                mergedBy {
+                    login
+                }
+                reviews(first:50) {
+                    totalCount
+                    nodes {
+                        author {
+                            login
+                        }
+                        createdAt
+                        body
+                        updatedAt
+                    }
+                }
+                updatedAt
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
+        }
+    }
+}

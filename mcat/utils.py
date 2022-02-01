@@ -38,7 +38,4 @@ def construct_file_name(name, component_a, component_b, separator="_"):
 
 def string_to_dict(string):
     """Function to convert json strings to dictionary"""
-    string = ast.literal_eval(string)
-    for i in range(len(string)):
-        string[i] = ast.literal_eval(string[i])
-    return string
+    return ast.literal_eval(string)

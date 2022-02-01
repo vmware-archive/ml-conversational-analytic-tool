@@ -1,0 +1,35 @@
+{
+  "Number": 1,
+  "Title": "test-title",
+  "User": "test-author-login",
+  "URL": "test-url",
+  "State": "MERGED",
+  "Body": "test-body",
+  "Additions": 2,
+  "Deletions": 3,
+  "Comments_Num": 1,
+  "Commits_Num": 1,
+  "Created_At": "2000-01-01T01:01:01Z",
+  "Closed_At": "2000-01-01T01:01:01Z",
+  "Merged": "True",
+  "Merged_At": "2000-01-01T01:01:01Z",
+  "Merged_By": "test-merged-by",
+  "Review_Comments_Num": 4,
+  "Updated_At": "2000-01-01T01:01:01Z",
+  "Comments": [
+    {
+      "Created_At": "2000-01-01T01:01:01Z",
+      "User": "test-comment-user",
+      "Body": "test-comment",
+      "Updated_At": "2000-01-01T01:01:01Z"
+    }
+  ],
+  "Review_Comments": [
+    {
+      "Created_At": "2000-01-01T01:01:01Z",
+      "User": "test-review-user",
+      "Body": "test-body",
+      "Updated_At": "2000-01-01T01:01:01Z"
+    }
+  ]
+}
