@@ -32,6 +32,7 @@ class Featurizer:
         """
         self.raw_filename = filename
         self.raw_data = pd.read_csv(filename)
+        self.raw_data.dropna(inplace=True)
 
         # Convert Comments and Review Comments to dictionary
         self.raw_data['Comments'] = self.raw_data['Comments'].apply(lambda comment: utils.string_to_dict(comment))
