@@ -2,6 +2,6 @@
 .DS_Store
 .ipynb_checkpoints
 env/
-exports/
 __pycache__/
 virtualenv-ml-conversational/
+ci_evaluator/ml/.venvs/
