@@ -73,13 +73,18 @@ create isolated Python environment is recommended for this project.
    pip install -r requirements.txt
    ```
 #### Testing
-6. Run all unit tests
+- Run all unit tests
    ```python
    python -m unittest discover -s tests
    ```
-7. Run an individual unit test
+- Run an individual unit test
    ```python
    python -m unittest tests/<file_name>
+   ```
+- By using tox
+   ```python
+   python -m pip install --upgrade tox
+   tox
    ```
 
 The libraries used within the project are available in the [requirements.txt](./requirements.txt).
