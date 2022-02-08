@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+import datetime
 import os
+import time
 
 import pandas as pd
 import requests
 
-import utils
+from mcat import utils
 
 
 class GithubDataExtractor:
@@ -82,56 +84,59 @@ class GithubDataExtractor:
         Parameters: query - dict of graphql query and variables
         Returns: json string
         """
-        has_next_page, allow_retry = True, True
-        end_cursor = None
+        has_next_page = True
         data = []
 
         while has_next_page:
+            # wait one second to avoid the secondary rate limits
+            time.sleep(1)
             print('retrieving data...')
 
-            response = requests.post(url='https://api.github.com/graphql', json=query, headers=self.headers)
-            status_code = response.status_code
-            response_reason = response.reason
-            response_json = response.json()
+            try:
+                response = requests.post(url='https://api.github.com/graphql', json=query, headers=self.headers)
+                response_json = response.json()
+                response_reason = response.reason
+                status_code = response.status_code
 
-            if status_code != 200 and status_code != 403 and status_code != 502:
-                raise requests.HTTPError('{}: {} {}'.format(status_code, response_reason, response_json))
+                if status_code == 200:
+                    # GitHub graphql has a bug that returns status 200 for exceeding the rate limit
+                    # When a rate limit has exceeded, retries after waiting until rate limit has reset
+                    # The wait time is calculated using returned header X-RateLimit-Reset
+                    rate_limit_remaining = response.headers.get('X-RateLimit-Remaining')
+                    if rate_limit_remaining == "0":
+                        rate_limit_reset = response.headers.get('X-RateLimit-Reset')
+                        rate_limit_reset_time = datetime.datetime.fromtimestamp(int(rate_limit_reset))
+                        current_time = datetime.datetime.now()
+                        wait_time_seconds = (rate_limit_reset_time - current_time).total_seconds()
 
-            if status_code == 403:
-                # Rate limit
-                # Exception is not thrown to allow partially collected data to be exported
-                print('Retrieval of all data failed: {} {} {}'.format(status_code, response_reason, response_json))
-                break
+                        print('rate limit exceeded, retrying after {} seconds'.format(wait_time_seconds))
+                        time.sleep(wait_time_seconds)
+                    else:
+                        if query['query'] == self.query_repos:
+                            org_repos = response_json['data']['organization']['repositories']
+                            page_info = org_repos['pageInfo']
+                            nodes = org_repos['nodes']
+                        else:
+                            repo_pull_requests = response_json['data']['repository']['pullRequests']
+                            page_info = repo_pull_requests['pageInfo']
+                            nodes = repo_pull_requests['nodes']
 
-            elif status_code == 502:
-                # Bad Gateway results are resolved after trying the same request once more
-                # Exception is not thrown to allow retry once and to allow partially collected data to be exported
-                if allow_retry:
-                    print('retrying with cursor: {}'.format(end_cursor))
-                    allow_retry = False
+                        end_cursor = page_info['endCursor']
+                        has_next_page = page_info['hasNextPage']
+
+                        variables = query['variables']
+                        variables['cursor'] = end_cursor
+                        query = {'query': query['query'], 'variables': variables}
+
+                        data += nodes
+                elif status_code in (502, 503, 403, 413, 429):
+                    print('retrying due to {} {} {}'.format(status_code, response_reason, response_json))
                 else:
-                    print('Retrieval of all data failed: {} {} {}'.format(status_code, response_reason, response_json))
-                    has_next_page = False
-
-            else:
-                if query['query'] == self.query_repos:
-                    org_repos = response_json['data']['organization']['repositories']
-                    page_info = org_repos['pageInfo']
-                    nodes = org_repos['nodes']
-                else:
-                    repo_pull_requests = response_json['data']['repository']['pullRequests']
-                    page_info = repo_pull_requests['pageInfo']
-                    nodes = repo_pull_requests['nodes']
-
-                end_cursor = page_info['endCursor']
-                has_next_page = page_info['hasNextPage']
-
-                variables = query['variables']
-                variables['cursor'] = end_cursor
-                query = {'query': query['query'], 'variables': variables}
-
-                data += nodes
-                allow_retry = True
+                    raise requests.HTTPError('{}: {} {}'.format(status_code, response_reason, response_json))
+            except requests.exceptions.ChunkedEncodingError as error:
+                # Broken connection, exception is not thrown to allow retry
+                print('retrying due to {}'.format(error))
+                pass
         return data
 
     def list_of_comments(self, comments):

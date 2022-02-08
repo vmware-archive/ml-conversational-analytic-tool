@@ -1,6 +1,7 @@
 # Copyright 2021 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import datetime
 import json
 import os
 import unittest
@@ -9,7 +10,7 @@ import unittest.mock
 import pandas as pd
 import requests
 
-import githubDataExtraction
+from mcat import githubDataExtraction
 
 
 class TestGitHubDataExtraction(unittest.TestCase):
@@ -19,6 +20,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
         self.test_organization = "test-org"
         self.test_repo = "test-repo"
         self.extractor = githubDataExtraction.GithubDataExtractor(self.test_access_token, self.test_organization)
+        self.extractor.wait_time = 1
         self.directory_path = os.path.dirname(os.path.realpath(__file__))
 
     def test_get_all_repos_returns_list_of_repos(self):
@@ -317,7 +319,8 @@ class TestGitHubDataExtraction(unittest.TestCase):
         )
 
     @unittest.mock.patch("requests.post")
-    def test_run_queries_throws_an_exception_if_request_status_code_is_not_200_403_502(self, mock_request_post):
+    def test_run_queries_throws_an_exception_if_request_status_code_is_not_200_502_503_403_413_429(self,
+                                                                                                   mock_request_post):
         test_status_code = 401
         test_reason = "test-reason"
         test_json_response = {}
@@ -389,7 +392,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
         self.assertEqual(2, mock_request_post.call_count)
 
     @unittest.mock.patch("requests.post")
-    def test_run_queries_returns_partial_data_when_rate_limit_reached(self, mock_request_post):
+    def test_run_queries_retries_when_status_code_is_502_503_403_413_429(self, mock_request_post):
         self.extractor.query_repos = """ { test query } """
 
         test_query_and_variables = {
@@ -403,7 +406,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
                     "repositories": {
                         "pageInfo": {
                             "endCursor": "test-end-cursor",
-                            "hasNextPage": True
+                            "hasNextPage": False
                         },
                         "nodes": {
                             "test": "test-value"
@@ -413,10 +416,55 @@ class TestGitHubDataExtraction(unittest.TestCase):
             }
         }
 
+        mock_response = [unittest.mock.MagicMock(), unittest.mock.MagicMock(), unittest.mock.MagicMock(),
+                         unittest.mock.MagicMock(), unittest.mock.MagicMock(), unittest.mock.MagicMock()]
+        mock_response[0].status_code = 403
+        mock_response[1].status_code = 413
+        mock_response[2].status_code = 429
+        mock_response[3].status_code = 502
+        mock_response[4].status_code = 503
+        mock_response[5].status_code = 200
+        mock_response[5].json.return_value = data_with_hasNextPage
+        mock_request_post.side_effect = mock_response
+
+        actual = self.extractor.run_queries(test_query_and_variables)
+        self.assertEqual(6, mock_request_post.call_count)
+        self.assertEqual(1, len(actual))
+
+    @unittest.mock.patch("datetime.datetime", wraps=datetime.datetime)
+    @unittest.mock.patch("requests.post")
+    def test_run_queries_retries_after_waiting_when_rate_limit_exceeds(self, mock_request_post, mock_datetime):
+        self.extractor.query_repos = """ { test query } """
+
+        test_query_and_variables = {
+            "query": self.extractor.query_repos,
+            "variables": {"key": "value"}
+        }
+
+        data_with_hasNextPage = {
+            "data": {
+                "organization": {
+                    "repositories": {
+                        "pageInfo": {
+                            "endCursor": "test-end-cursor",
+                            "hasNextPage": False
+                        },
+                        "nodes": {
+                            "test": "test-value"
+                        }
+                    }
+                }
+            }
+        }
+
+        mock_datetime.now.return_value = datetime.datetime(2022, 1, 1, 0, 0, 0)
+        mock_datetime.fromtimestamp.return_value = datetime.datetime(2022, 1, 1, 0, 0, 1)
+
         mock_response = [unittest.mock.MagicMock(), unittest.mock.MagicMock()]
-        mock_response[0].json.return_value = data_with_hasNextPage
         mock_response[0].status_code = 200
-        mock_response[1].status_code = 403
+        mock_response[0].headers.get = unittest.mock.MagicMock(return_value="0")
+        mock_response[1].status_code = 200
+        mock_response[1].json.return_value = data_with_hasNextPage
         mock_request_post.side_effect = mock_response
 
         actual = self.extractor.run_queries(test_query_and_variables)
@@ -424,7 +472,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
         self.assertEqual(1, len(actual))
 
     @unittest.mock.patch("requests.post")
-    def test_run_queries_returns_partial_data_when_call_fails_after_retry(self, mock_request_post):
+    def test_run_queries_retries_multiple_times(self, mock_request_post):
         test_query = """ { test query } """
         self.extractor.query_repos = test_query
 
@@ -439,7 +487,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
                     "repositories": {
                         "pageInfo": {
                             "endCursor": "test-end-cursor",
-                            "hasNextPage": True
+                            "hasNextPage": False
                         },
                         "nodes": {
                             "test": "test-value"
@@ -455,7 +503,7 @@ class TestGitHubDataExtraction(unittest.TestCase):
                     "repositories": {
                         "pageInfo": {
                             "endCursor": "test-end-cursor",
-                            "hasNextPage": False
+                            "hasNextPage": True
                         }
                     }
                 }
@@ -463,20 +511,20 @@ class TestGitHubDataExtraction(unittest.TestCase):
         }
 
         mock_response = [unittest.mock.MagicMock(), unittest.mock.MagicMock(), unittest.mock.MagicMock()]
-        mock_response[0].json.return_value = data_with_all_keys
-        mock_response[0].status_code = 200
+        mock_response[0].json.return_value = data_with_missing_nodes
+        mock_response[0].status_code = 502
         mock_response[1].json.return_value = data_with_missing_nodes
         mock_response[1].status_code = 502
-        mock_response[2].json.return_value = data_with_missing_nodes
-        mock_response[2].status_code = 502
+        mock_response[2].json.return_value = data_with_all_keys
+        mock_response[2].status_code = 200
         mock_request_post.side_effect = mock_response
 
         actual = self.extractor.run_queries(test_queries_and_variables)
         self.assertEqual(mock_request_post.call_count, 3)
         self.assertEqual(1, len(actual))
 
-    @unittest.mock.patch("utils.export_to_cvs")
-    @unittest.mock.patch("utils.construct_file_name")
+    @unittest.mock.patch("mcat.utils.export_to_cvs")
+    @unittest.mock.patch("mcat.utils.construct_file_name")
     def test_retrieve_and_export_pull_request_data_exports_data(self, mock_construct_file, mock_export):
         test_data_frame = pd.DataFrame({"test": 1, "one": [{"two": "three"}]})
         self.extractor.get_all_pull_requests = unittest.mock.MagicMock(return_value=test_data_frame)

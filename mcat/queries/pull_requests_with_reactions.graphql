@@ -16,7 +16,7 @@ query PullRequests($owner: String!, $repo: String!, $cursor: String) {
                 body
                 additions
                 deletions
-                comments(first: 50) {
+                comments(first: 100) {
                     totalCount
                     nodes {
                         author {
@@ -25,7 +25,7 @@ query PullRequests($owner: String!, $repo: String!, $cursor: String) {
                         createdAt
                         body
                         updatedAt
-                        reactions(first:50) {
+                        reactions(first: 100) {
                             nodes {
                                 content
                                 createdAt
@@ -46,7 +46,7 @@ query PullRequests($owner: String!, $repo: String!, $cursor: String) {
                 mergedBy {
                     login
                 }
-                reviews(first:50) {
+                reviews(first: 100) {
                     totalCount
                     nodes {
                         author {
@@ -66,3 +66,4 @@ query PullRequests($owner: String!, $repo: String!, $cursor: String) {
         }
     }
 }
+
