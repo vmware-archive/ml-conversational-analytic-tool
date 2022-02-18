@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ml-conversational-analytic-tool.baseLSTM API documentation</title>
+<title>mcat.baseCNN API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ml-conversational-analytic-tool.baseLSTM</code></h1>
+<h1 class="title">Module <code>mcat.baseCNN</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -30,29 +30,31 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
-import tensorflow as tf
 from sklearn.metrics import precision_recall_fscore_support
 from tensorflow import keras
+from tf_explain.core.smoothgrad import SmoothGrad
 
 
-class BaseLSTM:
+class BaseCNN:
     def __init__(self):
         &#34;&#34;&#34;
-        Constructor creates model
+        Constructor creates model and explainer
         &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
-        self.model = None
+        self.model = keras.models.Sequential()
+        self.explainer = SmoothGrad()
         self.model_ready = False
 
     def makeModel(self, input_shape):
         &#34;&#34;&#34;
-        Make lstm model for role agnostic data
+        Make 1d model for role agnostic data
         &#34;&#34;&#34;
         self.input_shape = input_shape
-        self.model = keras.models.Sequential()
-        self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
-        self.model.add(keras.layers.Dropout(0.2))
+        self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
+        self.model.add(keras.layers.MaxPooling1D(2))
+        self.model.add(keras.layers.Conv1D(64, 3, activation=&#39;relu&#39;))
+        self.model.add(keras.layers.Flatten())
         self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
         self.dimension2 = False
@@ -60,47 +62,31 @@ class BaseLSTM:
 
     def makeModel2D(self, input_shape):
         &#34;&#34;&#34;
-        Made lstm model for role relevant layers data
+        Make 2d model for role relevant data
         &#34;&#34;&#34;
-
-        # Inputs
         self.input_shape = input_shape
-        inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
-
-        # Pipe output of author and reviewer layer to two lstm
-        author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
-        reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
-
-        # Create author lstm
-        author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
-        author_dropout = keras.layers.Dropout(0.2)(author_lstm)
-        author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
-
-        # Create reviewer lstm
-        reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
-        reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
-        reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
-
-        # Concatenate author and reviewer output
-        combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
-        output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
-
-        self.model = keras.models.Model(inputs=inputs, outputs=output)
+        self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
+        self.model.add(keras.layers.MaxPooling2D((4, 4)))
+        self.model.add(keras.layers.Conv2D(8, (5, 5), activation=&#39;relu&#39;))
+        self.model.add(keras.layers.MaxPooling2D((4, 4)))
+        self.model.add(keras.layers.Flatten())
+        self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
         self.dimension2 = True
         self.model_ready = True
 
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+        &#34;&#34;&#34;
+        Train model
+        &#34;&#34;&#34;
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
-            train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                        batch_size=batch_size,
-                                        validation_data=(tf.ragged_stack(val_set[0]), tf.convert_to_tensor(val_set[1])),
-                                        verbose=1)
+            train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                        validation_data=(np.array(val_set[0]), np.array(val_set[1])), verbose=1)
             return train_hist
         else:
-            train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                        batch_size=batch_size, verbose=1)
+            train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                        validation_split=val_split, verbose=1)
             return train_hist
 
     def saveModel(self, name, version):
@@ -111,37 +97,27 @@ class BaseLSTM:
         Score model for accuracy, precision and recall
         &#34;&#34;&#34;
         evaluation = {}
-        evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
+        evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
                                                                                         average=&#39;binary&#39;)
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
     def predict(self, obs, labels=False):
-        predictions = self.model.predict(tf.ragged.stack(obs))
+        &#34;&#34;&#34;
+        Get predictions
+        &#34;&#34;&#34;
+        predictions = self.model.predict(np.array(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
     def explain(self, obs):
         &#34;&#34;&#34;
-        Explain prediction for obs by calculating gradients
+        Explain prediction for obs using explainer
         &#34;&#34;&#34;
-        grads = self._gradientImportance(obs)
-        imp = grads[:, 0] + grads[:, 1]
-        return imp
-
-    def _gradientImportance(self, seq):
-        &#34;&#34;&#34;
-        Get gradients
-        &#34;&#34;&#34;
-        seq = tf.Variable(seq[np.newaxis, :, :])
-        with tf.GradientTape() as tape:
-            predictions = self.model(seq)
-        grads = tape.gradient(predictions, seq)
-        grads = tf.reduce_mean(grads, axis=1).numpy()[0]
-
-        return grads</code></pre>
+        output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
+        return output</code></pre>
 </details>
 </section>
 <section>
@@ -153,33 +129,35 @@ class BaseLSTM:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM"><code class="flex name class">
-<span>class <span class="ident">BaseLSTM</span></span>
+<dt id="mcat.baseCNN.BaseCNN"><code class="flex name class">
+<span>class <span class="ident">BaseCNN</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Constructor creates model</p></div>
+<div class="desc"><p>Constructor creates model and explainer</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class BaseLSTM:
+<pre><code class="python">class BaseCNN:
     def __init__(self):
         &#34;&#34;&#34;
-        Constructor creates model
+        Constructor creates model and explainer
         &#34;&#34;&#34;
         self.dimension2 = True
         self.input_shape = ()
-        self.model = None
+        self.model = keras.models.Sequential()
+        self.explainer = SmoothGrad()
         self.model_ready = False
 
     def makeModel(self, input_shape):
         &#34;&#34;&#34;
-        Make lstm model for role agnostic data
+        Make 1d model for role agnostic data
         &#34;&#34;&#34;
         self.input_shape = input_shape
-        self.model = keras.models.Sequential()
-        self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
-        self.model.add(keras.layers.Dropout(0.2))
+        self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
+        self.model.add(keras.layers.MaxPooling1D(2))
+        self.model.add(keras.layers.Conv1D(64, 3, activation=&#39;relu&#39;))
+        self.model.add(keras.layers.Flatten())
         self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
         self.dimension2 = False
@@ -187,47 +165,31 @@ class BaseLSTM:
 
     def makeModel2D(self, input_shape):
         &#34;&#34;&#34;
-        Made lstm model for role relevant layers data
+        Make 2d model for role relevant data
         &#34;&#34;&#34;
-
-        # Inputs
         self.input_shape = input_shape
-        inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
-
-        # Pipe output of author and reviewer layer to two lstm
-        author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
-        reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
-
-        # Create author lstm
-        author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
-        author_dropout = keras.layers.Dropout(0.2)(author_lstm)
-        author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
-
-        # Create reviewer lstm
-        reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
-        reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
-        reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
-
-        # Concatenate author and reviewer output
-        combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
-        output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
-
-        self.model = keras.models.Model(inputs=inputs, outputs=output)
+        self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
+        self.model.add(keras.layers.MaxPooling2D((4, 4)))
+        self.model.add(keras.layers.Conv2D(8, (5, 5), activation=&#39;relu&#39;))
+        self.model.add(keras.layers.MaxPooling2D((4, 4)))
+        self.model.add(keras.layers.Flatten())
+        self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
         self.dimension2 = True
         self.model_ready = True
 
     def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+        &#34;&#34;&#34;
+        Train model
+        &#34;&#34;&#34;
         self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
         if val_set:
-            train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                        batch_size=batch_size,
-                                        validation_data=(tf.ragged_stack(val_set[0]), tf.convert_to_tensor(val_set[1])),
-                                        verbose=1)
+            train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                        validation_data=(np.array(val_set[0]), np.array(val_set[1])), verbose=1)
             return train_hist
         else:
-            train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                        batch_size=batch_size, verbose=1)
+            train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                        validation_split=val_split, verbose=1)
             return train_hist
 
     def saveModel(self, name, version):
@@ -238,140 +200,116 @@ class BaseLSTM:
         Score model for accuracy, precision and recall
         &#34;&#34;&#34;
         evaluation = {}
-        evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
+        evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
         evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
                                                                                         average=&#39;binary&#39;)
         print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
         return evaluation
 
     def predict(self, obs, labels=False):
-        predictions = self.model.predict(tf.ragged.stack(obs))
+        &#34;&#34;&#34;
+        Get predictions
+        &#34;&#34;&#34;
+        predictions = self.model.predict(np.array(obs))
         if labels:
             return [1 if x &gt; 0.5 else 0 for x in predictions]
         return predictions
 
     def explain(self, obs):
         &#34;&#34;&#34;
-        Explain prediction for obs by calculating gradients
+        Explain prediction for obs using explainer
         &#34;&#34;&#34;
-        grads = self._gradientImportance(obs)
-        imp = grads[:, 0] + grads[:, 1]
-        return imp
-
-    def _gradientImportance(self, seq):
-        &#34;&#34;&#34;
-        Get gradients
-        &#34;&#34;&#34;
-        seq = tf.Variable(seq[np.newaxis, :, :])
-        with tf.GradientTape() as tape:
-            predictions = self.model(seq)
-        grads = tape.gradient(predictions, seq)
-        grads = tf.reduce_mean(grads, axis=1).numpy()[0]
-
-        return grads</code></pre>
+        output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
+        return output</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.explain"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.explain"><code class="name flex">
 <span>def <span class="ident">explain</span></span>(<span>self, obs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Explain prediction for obs by calculating gradients</p></div>
+<div class="desc"><p>Explain prediction for obs using explainer</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def explain(self, obs):
     &#34;&#34;&#34;
-    Explain prediction for obs by calculating gradients
+    Explain prediction for obs using explainer
     &#34;&#34;&#34;
-    grads = self._gradientImportance(obs)
-    imp = grads[:, 0] + grads[:, 1]
-    return imp</code></pre>
+    output = self.explainer.explain((obs, None), self.model, 1, 20, 1.)
+    return output</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.makeModel"><code class="name flex">
 <span>def <span class="ident">makeModel</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Make lstm model for role agnostic data</p></div>
+<div class="desc"><p>Make 1d model for role agnostic data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel(self, input_shape):
     &#34;&#34;&#34;
-    Make lstm model for role agnostic data
+    Make 1d model for role agnostic data
     &#34;&#34;&#34;
     self.input_shape = input_shape
-    self.model = keras.models.Sequential()
-    self.model.add(keras.layers.LSTM(8, input_shape=input_shape))
-    self.model.add(keras.layers.Dropout(0.2))
+    self.model.add(keras.layers.Conv1D(32, 3, activation=&#39;relu&#39;, input_shape=input_shape))
+    self.model.add(keras.layers.MaxPooling1D(2))
+    self.model.add(keras.layers.Conv1D(64, 3, activation=&#39;relu&#39;))
+    self.model.add(keras.layers.Flatten())
     self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
     self.dimension2 = False
     self.model_ready = True</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel2D"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.makeModel2D"><code class="name flex">
 <span>def <span class="ident">makeModel2D</span></span>(<span>self, input_shape)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Made lstm model for role relevant layers data</p></div>
+<div class="desc"><p>Make 2d model for role relevant data</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeModel2D(self, input_shape):
     &#34;&#34;&#34;
-    Made lstm model for role relevant layers data
+    Make 2d model for role relevant data
     &#34;&#34;&#34;
-
-    # Inputs
     self.input_shape = input_shape
-    inputs = keras.Input(shape=(None, 512, 2), dtype=&#34;float32&#34;)
-
-    # Pipe output of author and reviewer layer to two lstm
-    author = keras.layers.Lambda(lambda x: x[:, :, :, 0])(inputs)
-    reviewer = keras.layers.Lambda(lambda x: x[:, :, :, 1])(inputs)
-
-    # Create author lstm
-    author_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(author)
-    author_dropout = keras.layers.Dropout(0.2)(author_lstm)
-    author_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(author_dropout)
-
-    # Create reviewer lstm
-    reviewer_lstm = keras.layers.LSTM(4, activation=&#39;relu&#39;, return_sequences=False)(reviewer)
-    reviewer_dropout = keras.layers.Dropout(0.2)(reviewer_lstm)
-    reviewer_output = keras.layers.Dense(1, activation=&#39;relu&#39;)(reviewer_dropout)
-
-    # Concatenate author and reviewer output
-    combine = keras.layers.Concatenate(axis=1)([author_output, reviewer_output])
-    output = keras.layers.Dense(1, activation=&#39;sigmoid&#39;)(combine)
-
-    self.model = keras.models.Model(inputs=inputs, outputs=output)
+    self.model.add(keras.layers.Conv2D(4, (5, 5), activation=&#39;relu&#39;, input_shape=input_shape))
+    self.model.add(keras.layers.MaxPooling2D((4, 4)))
+    self.model.add(keras.layers.Conv2D(8, (5, 5), activation=&#39;relu&#39;))
+    self.model.add(keras.layers.MaxPooling2D((4, 4)))
+    self.model.add(keras.layers.Flatten())
+    self.model.add(keras.layers.Dense(1, activation=&#39;sigmoid&#39;))
 
     self.dimension2 = True
     self.model_ready = True</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.predict"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.predict"><code class="name flex">
 <span>def <span class="ident">predict</span></span>(<span>self, obs, labels=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get predictions</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def predict(self, obs, labels=False):
-    predictions = self.model.predict(tf.ragged.stack(obs))
+    &#34;&#34;&#34;
+    Get predictions
+    &#34;&#34;&#34;
+    predictions = self.model.predict(np.array(obs))
     if labels:
         return [1 if x &gt; 0.5 else 0 for x in predictions]
     return predictions</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.saveModel"><code class="name flex">
 <span>def <span class="ident">saveModel</span></span>(<span>self, name, version)</span>
 </code></dt>
 <dd>
@@ -384,7 +322,7 @@ class BaseLSTM:
     self.model.save(&#34;{}/{}&#34;.format(name, version))</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.scoreModel"><code class="name flex">
 <span>def <span class="ident">scoreModel</span></span>(<span>self, obs, res)</span>
 </code></dt>
 <dd>
@@ -398,33 +336,34 @@ class BaseLSTM:
     Score model for accuracy, precision and recall
     &#34;&#34;&#34;
     evaluation = {}
-    evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(tf.ragged.stack(obs), tf.convert_to_tensor(res))
+    evaluation[&#39;Loss_Acc&#39;] = self.model.evaluate(np.array(obs), np.array(res))
     evaluation[&#39;Precision_Recall_Fscore_Support&#39;] = precision_recall_fscore_support(res, self.predict(obs, True),
                                                                                     average=&#39;binary&#39;)
     print(&#34;Accuracy: {}&#34;.format(evaluation[&#39;Loss_Acc&#39;][1]))
     return evaluation</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.trainModel"><code class="name flex">
+<dt id="mcat.baseCNN.BaseCNN.trainModel"><code class="name flex">
 <span>def <span class="ident">trainModel</span></span>(<span>self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Train model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def trainModel(self, obs, res, val_split=0.3, val_set=None, epochs=10, batch_size=32):
+    &#34;&#34;&#34;
+    Train model
+    &#34;&#34;&#34;
     self.model.compile(optimizer=keras.optimizers.Adam(), loss=&#39;binary_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
     if val_set:
-        train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                    batch_size=batch_size,
-                                    validation_data=(tf.ragged_stack(val_set[0]), tf.convert_to_tensor(val_set[1])),
-                                    verbose=1)
+        train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                    validation_data=(np.array(val_set[0]), np.array(val_set[1])), verbose=1)
         return train_hist
     else:
-        train_hist = self.model.fit(tf.ragged.stack(obs), tf.convert_to_tensor(res), epochs=epochs,
-                                    batch_size=batch_size, verbose=1)
+        train_hist = self.model.fit(np.array(obs), np.array(res), epochs=epochs, batch_size=batch_size,
+                                    validation_split=val_split, verbose=1)
         return train_hist</code></pre>
 </details>
 </dd>
@@ -441,21 +380,21 @@ class BaseLSTM:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ml-conversational-analytic-tool" href="index.html">ml-conversational-analytic-tool</a></code></li>
+<li><code><a title="mcat" href="index.html">mcat</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM">BaseLSTM</a></code></h4>
+<h4><code><a title="mcat.baseCNN.BaseCNN" href="#mcat.baseCNN.BaseCNN">BaseCNN</a></code></h4>
 <ul class="two-column">
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.explain" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.explain">explain</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel">makeModel</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel2D" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.makeModel2D">makeModel2D</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.predict" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.predict">predict</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.saveModel">saveModel</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.scoreModel">scoreModel</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM.BaseLSTM.trainModel" href="#ml-conversational-analytic-tool.baseLSTM.BaseLSTM.trainModel">trainModel</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.explain" href="#mcat.baseCNN.BaseCNN.explain">explain</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.makeModel" href="#mcat.baseCNN.BaseCNN.makeModel">makeModel</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.makeModel2D" href="#mcat.baseCNN.BaseCNN.makeModel2D">makeModel2D</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.predict" href="#mcat.baseCNN.BaseCNN.predict">predict</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.saveModel" href="#mcat.baseCNN.BaseCNN.saveModel">saveModel</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.scoreModel" href="#mcat.baseCNN.BaseCNN.scoreModel">scoreModel</a></code></li>
+<li><code><a title="mcat.baseCNN.BaseCNN.trainModel" href="#mcat.baseCNN.BaseCNN.trainModel">trainModel</a></code></li>
 </ul>
 </li>
 </ul>

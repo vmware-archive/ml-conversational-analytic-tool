@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ml-conversational-analytic-tool.commentAnalysis API documentation</title>
+<title>mcat.commentAnalysis API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ml-conversational-analytic-tool.commentAnalysis</code></h1>
+<h1 class="title">Module <code>mcat.commentAnalysis</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -135,7 +135,7 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer"><code class="flex name class">
+<dt id="mcat.commentAnalysis.CommentAnalyzer"><code class="flex name class">
 <span>class <span class="ident">CommentAnalyzer</span></span>
 <span>(</span><span>words)</span>
 </code></dt>
@@ -221,7 +221,7 @@ Parameters: words - list of words to count</p></div>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.analyzeComment"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.analyzeComment"><code class="name flex">
 <span>def <span class="ident">analyzeComment</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
@@ -247,7 +247,7 @@ Returns: dictionary with features</p></div>
     return result</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.changeWords"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.changeWords"><code class="name flex">
 <span>def <span class="ident">changeWords</span></span>(<span>self, words)</span>
 </code></dt>
 <dd>
@@ -263,7 +263,7 @@ Returns: dictionary with features</p></div>
     self.word_count = {word: 0 for word in words}</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.countWords"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.countWords"><code class="name flex">
 <span>def <span class="ident">countWords</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
@@ -288,7 +288,7 @@ Returns: dictionary with word counts</p></div>
     return current_word_count</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getCodeBlockCount"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.getCodeBlockCount"><code class="name flex">
 <span>def <span class="ident">getCodeBlockCount</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
@@ -312,7 +312,7 @@ Returns: integer count</p></div>
     return int(count / 2)  # Divide by 2 since pairs</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getSentiment"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.getSentiment"><code class="name flex">
 <span>def <span class="ident">getSentiment</span></span>(<span>self, comment)</span>
 </code></dt>
 <dd>
@@ -330,7 +330,7 @@ Returns: dictionary with positive, negative and neutral scores</p></div>
     return self.vader_sentiment.polarity_scores(comment)[&#34;compound&#34;]</code></pre>
 </details>
 </dd>
-<dt id="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.preProcess"><code class="name flex">
+<dt id="mcat.commentAnalysis.CommentAnalyzer.preProcess"><code class="name flex">
 <span>def <span class="ident">preProcess</span></span>(<span>self, text)</span>
 </code></dt>
 <dd>
@@ -367,20 +367,20 @@ Returns: string after cleaning</p></div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ml-conversational-analytic-tool" href="index.html">ml-conversational-analytic-tool</a></code></li>
+<li><code><a title="mcat" href="index.html">mcat</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer">CommentAnalyzer</a></code></h4>
+<h4><code><a title="mcat.commentAnalysis.CommentAnalyzer" href="#mcat.commentAnalysis.CommentAnalyzer">CommentAnalyzer</a></code></h4>
 <ul class="two-column">
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.analyzeComment" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.analyzeComment">analyzeComment</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.changeWords" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.changeWords">changeWords</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.countWords" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.countWords">countWords</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getCodeBlockCount" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getCodeBlockCount">getCodeBlockCount</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getSentiment" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.getSentiment">getSentiment</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.preProcess" href="#ml-conversational-analytic-tool.commentAnalysis.CommentAnalyzer.preProcess">preProcess</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.analyzeComment" href="#mcat.commentAnalysis.CommentAnalyzer.analyzeComment">analyzeComment</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.changeWords" href="#mcat.commentAnalysis.CommentAnalyzer.changeWords">changeWords</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.countWords" href="#mcat.commentAnalysis.CommentAnalyzer.countWords">countWords</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.getCodeBlockCount" href="#mcat.commentAnalysis.CommentAnalyzer.getCodeBlockCount">getCodeBlockCount</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.getSentiment" href="#mcat.commentAnalysis.CommentAnalyzer.getSentiment">getSentiment</a></code></li>
+<li><code><a title="mcat.commentAnalysis.CommentAnalyzer.preProcess" href="#mcat.commentAnalysis.CommentAnalyzer.preProcess">preProcess</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ml-conversational-analytic-tool API documentation</title>
+<title>mcat.utils API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,58 +19,133 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>ml-conversational-analytic-tool</code></h1>
+<h1 class="title">Module <code>mcat.utils</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import ast
+import os
+from pathlib import Path
+
+import pandas as pd
+
+EXPORTS_DIR = &#34;exports&#34;
+
+
+def export_to_cvs(export_df: pd.DataFrame, name):
+    &#34;&#34;&#34;
+    Export DataFrame into csv file with given name
+    &#34;&#34;&#34;
+
+    if not os.path.exists(EXPORTS_DIR):
+        os.mkdir(EXPORTS_DIR)
+
+    file = os.path.join(EXPORTS_DIR, name)
+
+    export_df.to_csv(file, index=False)
+    print(&#34;Output file: &#34;, os.path.abspath(file))
+
+
+def construct_file_name(name, component_a, component_b, separator=&#34;_&#34;):
+    &#34;&#34;&#34;
+    Construct output file name if `name` is not provided explicitly.
+    File output name is constructed based on component_a, component_b and separator input parameters :
+    &lt;component_a&gt;&lt;separator&gt;&lt;component_b&gt;.csv
+    &#34;&#34;&#34;
+    if name:
+        _, file_extension = os.path.splitext(name)
+        if not file_extension:
+            name = name + &#34;.csv&#34;
+        return name
+    else:
+        return &#34;{}{}{}.csv&#34;.format(Path(component_a).stem, separator, component_b)
+
+
+def string_to_dict(string):
+    &#34;&#34;&#34;Function to convert json strings to dictionary&#34;&#34;&#34;
+    string = ast.literal_eval(string)
+    for i in range(len(string)):
+        string[i] = ast.literal_eval(string[i])
+    return string</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.baseCNN" href="baseCNN.html">ml-conversational-analytic-tool.baseCNN</a></code></dt>
+<dt id="mcat.utils.construct_file_name"><code class="name flex">
+<span>def <span class="ident">construct_file_name</span></span>(<span>name, component_a, component_b, separator='_')</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Construct output file name if <code>name</code> is not provided explicitly.
+File output name is constructed based on component_a, component_b and separator input parameters :
+<component_a><separator><component_b>.csv</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def construct_file_name(name, component_a, component_b, separator=&#34;_&#34;):
+    &#34;&#34;&#34;
+    Construct output file name if `name` is not provided explicitly.
+    File output name is constructed based on component_a, component_b and separator input parameters :
+    &lt;component_a&gt;&lt;separator&gt;&lt;component_b&gt;.csv
+    &#34;&#34;&#34;
+    if name:
+        _, file_extension = os.path.splitext(name)
+        if not file_extension:
+            name = name + &#34;.csv&#34;
+        return name
+    else:
+        return &#34;{}{}{}.csv&#34;.format(Path(component_a).stem, separator, component_b)</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.baseLSTM" href="baseLSTM.html">ml-conversational-analytic-tool.baseLSTM</a></code></dt>
+<dt id="mcat.utils.export_to_cvs"><code class="name flex">
+<span>def <span class="ident">export_to_cvs</span></span>(<span>export_df: pandas.core.frame.DataFrame, name)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Export DataFrame into csv file with given name</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def export_to_cvs(export_df: pd.DataFrame, name):
+    &#34;&#34;&#34;
+    Export DataFrame into csv file with given name
+    &#34;&#34;&#34;
+
+    if not os.path.exists(EXPORTS_DIR):
+        os.mkdir(EXPORTS_DIR)
+
+    file = os.path.join(EXPORTS_DIR, name)
+
+    export_df.to_csv(file, index=False)
+    print(&#34;Output file: &#34;, os.path.abspath(file))</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.commentAnalysis" href="commentAnalysis.html">ml-conversational-analytic-tool.commentAnalysis</a></code></dt>
+<dt id="mcat.utils.string_to_dict"><code class="name flex">
+<span>def <span class="ident">string_to_dict</span></span>(<span>string)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.featureVector" href="featureVector.html">ml-conversational-analytic-tool.featureVector</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.githubDataExtraction" href="githubDataExtraction.html">ml-conversational-analytic-tool.githubDataExtraction</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.github_data" href="github_data.html">ml-conversational-analytic-tool.github_data</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.preProcessedDataset" href="preProcessedDataset.html">ml-conversational-analytic-tool.preProcessedDataset</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.run" href="run.html">ml-conversational-analytic-tool.run</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.runDataExtraction" href="runDataExtraction.html">ml-conversational-analytic-tool.runDataExtraction</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ml-conversational-analytic-tool.utils" href="utils.html">ml-conversational-analytic-tool.utils</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Function to convert json strings to dictionary</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def string_to_dict(string):
+    &#34;&#34;&#34;Function to convert json strings to dictionary&#34;&#34;&#34;
+    string = ast.literal_eval(string)
+    for i in range(len(string)):
+        string[i] = ast.literal_eval(string[i])
+    return string</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -81,18 +156,16 @@
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ml-conversational-analytic-tool.baseCNN" href="baseCNN.html">ml-conversational-analytic-tool.baseCNN</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.baseLSTM" href="baseLSTM.html">ml-conversational-analytic-tool.baseLSTM</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.commentAnalysis" href="commentAnalysis.html">ml-conversational-analytic-tool.commentAnalysis</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.featureVector" href="featureVector.html">ml-conversational-analytic-tool.featureVector</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.githubDataExtraction" href="githubDataExtraction.html">ml-conversational-analytic-tool.githubDataExtraction</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.github_data" href="github_data.html">ml-conversational-analytic-tool.github_data</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.preProcessedDataset" href="preProcessedDataset.html">ml-conversational-analytic-tool.preProcessedDataset</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.run" href="run.html">ml-conversational-analytic-tool.run</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.runDataExtraction" href="runDataExtraction.html">ml-conversational-analytic-tool.runDataExtraction</a></code></li>
-<li><code><a title="ml-conversational-analytic-tool.utils" href="utils.html">ml-conversational-analytic-tool.utils</a></code></li>
+<li><code><a title="mcat" href="index.html">mcat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="mcat.utils.construct_file_name" href="#mcat.utils.construct_file_name">construct_file_name</a></code></li>
+<li><code><a title="mcat.utils.export_to_cvs" href="#mcat.utils.export_to_cvs">export_to_cvs</a></code></li>
+<li><code><a title="mcat.utils.string_to_dict" href="#mcat.utils.string_to_dict">string_to_dict</a></code></li>
 </ul>
 </li>
 </ul>
