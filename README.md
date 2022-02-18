@@ -73,15 +73,18 @@ create isolated Python environment is recommended for this project.
    pip install -r requirements.txt
    ```
 #### Testing
-6. Run all unit tests
+- Run all unit tests
    ```python
-   cd ml-conversational-analytic-tool
    python -m unittest discover -s tests
    ```
-7. Run an individual unit test
+- Run an individual unit test
    ```python
-   cd ml-conversational-analytic-tool
    python -m unittest tests/<file_name>
+   ```
+- By using tox
+   ```python
+   python -m pip install --upgrade tox
+   tox
    ```
 
 The libraries used within the project are available in the [requirements.txt](./requirements.txt).
@@ -107,7 +110,7 @@ export GITACCESS=<YOUR_TOKEN>
 
 Run the script by passing in `organization`
 ```python
-python ./ml-conversational-analytic-tool/githubDataExtraction.py <organization>
+python ./mcat/githubDataExtraction.py <organization>
 ```
 
 - `organization` is the name of the repository owner
@@ -119,7 +122,7 @@ python ./ml-conversational-analytic-tool/githubDataExtraction.py <organization>
 `github_data.py` prepares your data for annotation use. Run the script by passing in path to `rawdatafile`.
 
 ```python
-python ./ml-conversational-analytic-tool/github_data.py <rawdatafile> --name <output_filename>
+python ./mcat/github_data.py <rawdatafile> --name <output_filename>
 ```
 
 - `rawdatafile` is location of raw data csv
@@ -137,7 +140,7 @@ include sentiment and code blocks. `Words` file contains words important in meas
 constructiveness. This functionality could be used instead of manual annotation.
 
 ```python
-python ./ml-conversational-analytic-tool/featureVector.py <rawdatafile> --words <words_filename> --name <output_filename>
+python ./mcat/featureVector.py <rawdatafile> --words <words_filename> --name <output_filename>
 ```
 - `words` (optional) path to the words file
 - `name`  (optional) name of the output file.
@@ -154,7 +157,7 @@ There are two models available for training
 To train, run the script with required parameters path to `annotated_filename`, `dataset_filename`, `model`, and `outcome`.
 
 ```python
-python ./ml-conversational-analytic-tool/run.py <annotated_filename> <dataset_filename> <model> <outcome>
+python ./mcat/run.py <annotated_filename> <dataset_filename> <model> <outcome>
 ```
 
 - `annotated_filename` is the location of the annotated dataset file
@@ -176,12 +179,12 @@ communication, we welcome your contributions!
 ## Documentation
 
 Auto-generated API documentation can be found in
-[docs/ml-conversational-analytic-tool](./docs/ml-conversational-analytic-tool) directory.
+[docs/mcat](./docs/mcat) directory.
 
 Run the following command to update the API documentation
 
 ```python
-PYTHONPATH=./ml-conversational-analytic-tool pdoc --html --output-dir docs ml-conversational-analytic-tool
+PYTHONPATH=./mcat pdoc --html --output-dir docs mcat
 ```
 
 ## Blog Posts

@@ -1,7 +1,7 @@
 import unittest
 import unittest.mock
 
-import commentAnalysis
+from mcat import commentAnalysis
 
 class TestCommentAnalysis(unittest.TestCase):
 
