@@ -1,154 +1,219 @@
 # Copyright 2021 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import argparse
+import datetime
 import os
 import time
 
-import argparse
 import pandas as pd
-from github import Github
-from github.GithubException import RateLimitExceededException
+import requests
 
-import utils
+from mcat import utils
 
 
 class GithubDataExtractor:
-    def __init__(self, access_token):
+    def __init__(self, access_token, organization):
         """
         Constructor requires an access token to start a Github session, and specifies instance variables
         """
-        self.g_ses = Github(access_token)  # Github object is used as a channel to the Github API
-        self.current_repo = None  # Current Opened Repo
         self.reaction_flag = False
-        self.repo_opened = False  # Flag to store state of repo as opened (True) or closed (False)
-        self.repo_name = ""
-        self.organization = ""
-
-    def openRepo(self, organization, repo_name):
-        """
-        Method to  open (access) repository with given organization and repository name (reponame).
-        Parameters: username - owner of the repository, repo_name - name of repo to be opened
-        """
-        self.current_repo = self.g_ses.get_repo(organization + "/" + repo_name)  # Open repo
-        self.repo_opened = True
-        self.repo_name = repo_name
         self.organization = organization
-        print("Opened repo {}/{}".format(organization, repo_name))
+        self.query_repos = self.load_query('repos.graphql')
+        self.query_pull_requests_without_reactions = self.load_query('pull_requests_without_reactions.graphql')
+        self.query_pull_requests_with_reactions = self.load_query('pull_requests_with_reactions.graphql')
+        self.headers = {'Authorization': 'bearer ' + access_token}
 
-    def getAllPulls(self, reaction_flag=False):
+    def get_all_repos(self):
         """
-        Method to form a dataframe containing pull information. Parameters: name - name of exported csv file,
-        export - if the dataframe should be exported to csv. Returns: Dataframe with pull data
+         Method to get all repos of an organization
+         Parameters: None
+         Returns: A list of repository names
+         """
+        queries_and_variables = {
+            'query': self.query_repos,
+            'variables': {'owner': self.organization}
+        }
+        repository_list = self.run_queries(query=queries_and_variables)
+        repositories = [repository.get('name') for repository in repository_list]
+        return repositories
+
+    def get_all_pull_requests(self, repo, reaction_flag=False):
+        """
+        Method to get all pull requests from a repo
+        Parameters:
+            repo - string
+            reaction_flag - boolean
+        Returns: dataframe containing rows of pull requests
         """
         self.reaction_flag = reaction_flag
-        if self.repo_opened:  # Verify if a repo has been opened
-            pull_data = []
-            pull_data.extend(self.getPullsByState('open'))  # Access all open pulls
-            pull_data.extend(self.getPullsByState('closed'))  # Access all closed pulls
-            return pd.DataFrame(pull_data)  # Return list of dictionaries converted to dataframe
-        print("Please open a Repo")
+        if self.reaction_flag:
+            query = self.query_pull_requests_with_reactions
+        else:
+            query = self.query_pull_requests_without_reactions
 
-    def getPullsByState(self, state):
-        """
-        Extract pulls with given state. Parameters: state - state of the pull (open or closed)
-        Return: list of dictionaries containing data regardining each pull
-        """
-        pull_data = []
-        try:  # Call the Github api to get all pulls
-            pulls = self.current_repo.get_pulls(state=state, sort='create')
-        except RateLimitExceededException as e:  # If token has reached limit
-            print("Token rate limit exceeded. Waiting for 1 hour", e)
-            time.sleep(60 * 60)  # Wait for 1 hour (time required to reset)
-            pulls = self.current_repo.get_pulls(state=state, sort='create')  # Get all pulls from Github API again
-        # Iterate over each pull
-        for pull in pulls:
-            try:  # Call to extract features for each pull
-                pull_data.append(self.getPullFeatures(pull))
-            except RateLimitExceededException as e:  # getPullFeatures accesses the Github API so provisino for rate limit
-                print("Token rate limit exceeded. Waiting for 1 hour", e)
-                time.sleep(60 * 60)
-                pull_data.append(self.getPullFeatures(pull))
-        return pull_data
+        queries_and_variables = {
+            'query': query,
+            'variables': {'owner': self.organization, 'repo': repo}
+        }
+        pull_request_list = self.run_queries(query=queries_and_variables)
+        pull_data = (self.get_pull_features(pr) for pr in pull_request_list)
+        pull_request_df = pd.DataFrame(pull_data)
 
-    def listOfComments(self, comments):
+        try:
+            # sort by the first column: Pull request number
+            return pull_request_df.sort_values(by=pull_request_df.columns[0])
+        except IndexError:
+            return pull_request_df
+
+    def load_query(self, file_name, directory='queries'):
         """
-        Method to form a list of json strings rerpesenting comments (reviews or issue).
-        Parameters: comments - list of comment objects. Returns: List of json strings
+        Method to load graphql queries
+        Parameters: file_name - name of the graphql query file
+        Returns: string
+        """
+        directory_path = os.path.dirname(os.path.realpath(__file__))
+        query_path = os.path.join(directory_path, directory, file_name)
+
+        with open(query_path) as file:
+            return file.read()
+
+    def run_queries(self, query):
+        """
+        Method to run graphql queries
+        Parameters: query - dict of graphql query and variables
+        Returns: json string
+        """
+        has_next_page = True
+        data = []
+
+        while has_next_page:
+            # wait one second to avoid the secondary rate limits
+            time.sleep(1)
+            print('retrieving data...')
+
+            try:
+                response = requests.post(url='https://api.github.com/graphql', json=query, headers=self.headers)
+                response_json = response.json()
+                response_reason = response.reason
+                status_code = response.status_code
+
+                if status_code == 200:
+                    # GitHub graphql has a bug that returns status 200 for exceeding the rate limit
+                    # When a rate limit has exceeded, retries after waiting until rate limit has reset
+                    # The wait time is calculated using returned header X-RateLimit-Reset
+                    rate_limit_remaining = response.headers.get('X-RateLimit-Remaining')
+                    if rate_limit_remaining == "0":
+                        rate_limit_reset = response.headers.get('X-RateLimit-Reset')
+                        rate_limit_reset_time = datetime.datetime.fromtimestamp(int(rate_limit_reset))
+                        current_time = datetime.datetime.now()
+                        wait_time_seconds = (rate_limit_reset_time - current_time).total_seconds()
+
+                        print('rate limit exceeded, retrying after {} seconds'.format(wait_time_seconds))
+                        time.sleep(wait_time_seconds)
+                    else:
+                        if query['query'] == self.query_repos:
+                            org_repos = response_json['data']['organization']['repositories']
+                            page_info = org_repos['pageInfo']
+                            nodes = org_repos['nodes']
+                        else:
+                            repo_pull_requests = response_json['data']['repository']['pullRequests']
+                            page_info = repo_pull_requests['pageInfo']
+                            nodes = repo_pull_requests['nodes']
+
+                        end_cursor = page_info['endCursor']
+                        has_next_page = page_info['hasNextPage']
+
+                        variables = query['variables']
+                        variables['cursor'] = end_cursor
+                        query = {'query': query['query'], 'variables': variables}
+
+                        data += nodes
+                elif status_code in (502, 503, 403, 413, 429):
+                    print('retrying due to {} {} {}'.format(status_code, response_reason, response_json))
+                else:
+                    raise requests.HTTPError('{}: {} {}'.format(status_code, response_reason, response_json))
+            except requests.exceptions.ChunkedEncodingError as error:
+                # Broken connection, exception is not thrown to allow retry
+                print('retrying due to {}'.format(error))
+                pass
+        return data
+
+    def list_of_comments(self, comments):
+        """
+        Method to form a list of json strings representing comments, reviews, or issue.
+        Parameters: comments - list of comments
+        Returns: List of json strings
         """
         list_comments = []
 
         # Iterate over each comment
         for comment in comments:
+            comment_user = comment.get("author").get("login", None) if comment.get("author") is not None else None
+
             # Record reactions if Flag is True
             if self.reaction_flag:
                 reactions = []
-                raw_reactions = []
-
-                try:  # Call to extract all raw reactions
-                    raw_reactions = comment.get_reactions()
-                except RateLimitExceededException as e:  # get_reactions accesses the Github API so provisino for rate limit
-                    print("Token rate limit exceeded. Waiting for 1 hour", e)
-                    time.sleep(60 * 60)
-                    raw_reactions = comment.get_reactions()
+                raw_reactions = comment.get("reactions").get("nodes", None) if comment.get(
+                    "reactions") is not None else []
 
                 for reaction in raw_reactions:
+                    reaction_user = reaction.get("user").get("login", None) if reaction.get(
+                        "user") is not None else None
+
                     # Extract information regarding each reaction
-                    try:
-                        reactions.append((reaction.content, str(reaction.created_at), reaction.user.name))
-                    except:
-                        reactions.append((reaction.content, str(reaction.created_at), None))
+                    reactions.append({"Content": reaction.get("content", None),
+                                      "Created_At": reaction.get("createdAt", None),
+                                      "User": reaction_user})
 
                 # Extract information regarding each comment
-                try:
-                    list_comments.append(
-                        str({"Created_At": str(comment.created_at), "User": comment.user.name, "Body": comment.body,
-                             "Updated_At": str(comment.updated_at), "Reactions": reactions}))
-                except:
-                    list_comments.append(str({"Created_At": str(comment.created_at), "User": None, "Body": comment.body,
-                                              "Updated_At": str(comment.updated_at), "Reactions": reactions}))
+                list_comments.append({"Created_At": comment.get("createdAt", None),
+                                      "User": comment_user,
+                                      "Body": comment.get("body", None),
+                                      "Updated_At": comment.get("updatedAt", None),
+                                      "Reactions": reactions})
             else:
-                try:
-                    list_comments.append(
-                        str({"Created_At": str(comment.created_at), "User": comment.user.name, "Body": comment.body,
-                             "Updated_At": str(comment.updated_at)}))
-                except:
-                    list_comments.append(str({"Created_At": str(comment.created_at), "User": None, "Body": comment.body,
-                                              "Updated_At": str(comment.updated_at)}))
+                list_comments.append({"Created_At": comment.get("createdAt", None),
+                                      "User": comment_user,
+                                      "Body": comment.get("body", None),
+                                      "Updated_At": comment.get("updatedAt", None)})
         return list_comments
 
-    def getPullFeatures(self, pull):
+    def get_pull_features(self, pull):
         """
         Method to get all data for a particular pull. Parameters: pull - object representing a pull
         Returns: dictionary containing all data of a pull
         """
-        pull_dict = {}
-        pull_dict["Number"] = pull.number
-        pull_dict["Title"] = pull.title
-        try:
-            pull_dict["User"] = pull.user.name
-        except:
-            pull_dict["User"] = None
-        pull_dict["URL"] = pull.url
-        pull_dict["State"] = pull.state
-        pull_dict["Body"] = pull.body
-        pull_dict["Additions"] = pull.additions
-        pull_dict["Deletions"] = pull.deletions
-        pull_dict["Comments_Num"] = pull.comments
-        pull_dict["Commits_Num"] = pull.commits
-        pull_dict["Created_At"] = pull.created_at
-        pull_dict["Closed_At"] = pull.closed_at
-        pull_dict["Merged"] = pull.merged
-        pull_dict["Merged_At"] = pull.merged_at
-        try:  # Attribute merged_by might be none if it has not been merged
-            pull_dict["Merged_By"] = pull.merged_by.name
-        except:  # If not merged then none
-            pull_dict["Merged_By"] = None
-        pull_dict["Review_Comments_Num"] = pull.review_comments
-        pull_dict["Updated_At"] = pull.updated_at
-        pull_dict["Comments"] = self.listOfComments(pull.get_issue_comments())
-        pull_dict["Review_Comments"] = self.listOfComments(pull.get_review_comments())
+        comments = pull.get('comments').get('nodes', None) if 'comments' in pull else None
+        reviews = pull.get("reviews").get("nodes", None) if "reviews" in pull else None
 
-        return pull_dict
+        return {
+            'Number': pull.get('number', None),
+            'Title': pull.get('title', None),
+            'User': pull.get('author').get('login', None) if pull.get('author') is not None else None,
+            'URL': pull.get('url', None),
+            'State': pull.get('state', None),
+            'Body': pull.get('body', None),
+            'Additions': pull.get('additions', None),
+            'Deletions': pull.get('deletions', None),
+            'Comments_Num': pull.get('comments').get('totalCount', None) if pull.get('comments') is not None else None,
+            'Commits_Num': pull.get('comments').get('totalCount', None) if pull.get('commits') is not None else None,
+            'Created_At': pull.get('createdAt', None),
+            'Closed_At': pull.get('closedAt', None),
+            'Merged': pull.get('merged', None),
+            'Merged_At': pull.get('mergedAt', None),
+            'Merged_By': pull.get('mergedBy').get('login', None) if pull.get('mergedBy') is not None else None,
+            'Review_Comments_Num': pull.get('reviews').get('totalCount', None) if pull.get(
+                'reviews') is not None else None,
+            'Updated_At': pull.get('updatedAt'),
+            'Comments': self.list_of_comments(comments) if comments is not None else [],
+            "Review_Comments": self.list_of_comments(reviews) if reviews is not None else []
+        }
+
+    def retrieve_and_export_pull_request_data(self, repo, reactions_flag, name, organization):
+        df = self.get_all_pull_requests(repo, reactions_flag)
+        file_name = utils.construct_file_name(name, organization, repo)
+        utils.export_to_cvs(df, file_name)
 
 
 if __name__ == "__main__":
@@ -156,24 +221,20 @@ if __name__ == "__main__":
     parser.add_argument('organization', help='Organization the repo belongs to.')
     parser.add_argument('-R', '--repo', help='Name of repo.')
     parser.add_argument('--reactions', action='store_true', default=False, help='Flag to extract reactions')
-    parser.add_argument('-n', "--name", help='Output file name. If not specified, the name is constructed like this: '
-            '<organization>_<repo>.csv')
+    parser.add_argument('-n', "--name",
+                        help='Output file name. If not specified, the name is constructed like this: <organization>_<repo>.csv')
 
     args = parser.parse_args()
     ACCESS_TOKEN = os.environ["GITACCESS"]  # Access Github token from environment for security purposes
-    extractor = GithubDataExtractor(ACCESS_TOKEN)  # Create object
+    extractor = GithubDataExtractor(ACCESS_TOKEN, args.organization)
 
     if args.repo is None:
         # Extract data for all repositories in organization
-        repos = extractor.g_ses.get_organization(args.organization).get_repos()
+        repos = extractor.get_all_repos()
         for repo in repos:
-            extractor.openRepo(args.organization, repo.name)
-            df = extractor.getAllPulls(args.reactions)
-            file_name = utils.construct_file_name(None, args.organization, repo.name)
-            utils.export_to_cvs(df, file_name)
+            extractor.retrieve_and_export_pull_request_data(repo=repo, reactions_flag=args.reactions, name=None,
+                                                            organization=args.organization)
     else:
         # Extract data for an individual repository
-        extractor.openRepo(args.organization, args.repo)
-        df = extractor.getAllPulls(args.reactions)
-        file_name = utils.construct_file_name(args.name, args.organization, args.repo)
-        utils.export_to_cvs(df, file_name)
+        extractor.retrieve_and_export_pull_request_data(repo=args.repo, reactions_flag=args.reactions, name=args.name,
+                                                        organization=args.organization)

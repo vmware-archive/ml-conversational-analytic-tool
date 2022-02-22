@@ -1,11 +1,15 @@
+# Copyright 2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 import unittest.mock
 
 from mcat import commentAnalysis
 
+
 class TestCommentAnalysis(unittest.TestCase):
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.sentiment_analyzer = commentAnalysis.vader.SentimentIntensityAnalyzer()
         self.sentiment_analyzer.polarity_scores = unittest.mock.MagicMock(return_value={"compound": 1.0})
 
@@ -50,3 +54,7 @@ class TestCommentAnalysis(unittest.TestCase):
         analyzer = commentAnalysis.CommentAnalyzer(['test'])
         result = analyzer.getCodeBlockCount("```This comment has code block``` ``` this is the 2nd code block```")
         self.assertEqual(2, result)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,0 +1,17 @@
+# Copyright 2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+query ($owner: String!, $cursor: String) {
+    organization(login: $owner) {
+        repositories(first: 100, after: $cursor) {
+            nodes {
+                name
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
+        }
+    }
+}
+
