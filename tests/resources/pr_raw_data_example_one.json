@@ -1,0 +1,71 @@
+{
+  "number": 1,
+  "title": "test-title",
+  "author": {
+    "login": "test-author-login"
+  },
+  "url": "test-url",
+  "state": "MERGED",
+  "body": "test-body",
+  "additions": 2,
+  "deletions": 3,
+  "comments": {
+    "totalCount": 1,
+    "nodes": [
+      {
+        "author": {
+          "login": "test-comment-user"
+        },
+        "createdAt": "2000-01-01T01:01:01Z",
+        "body": "test-comment",
+        "updatedAt": "2000-01-01T01:01:01Z",
+        "reactions": {
+          "nodes": [
+            {
+              "content": "test-content",
+              "createdAt": "2000-01-01T01:01:01Z",
+              "user": {
+                "login": "test-reaction-user"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "commits": {
+    "totalCount": 1
+  },
+  "createdAt": "2000-01-01T01:01:01Z",
+  "closedAt": "2000-01-01T01:01:01Z",
+  "merged": "True",
+  "mergedAt": "2000-01-01T01:01:01Z",
+  "mergedBy": {
+    "login": "test-merged-by"
+  },
+  "reviews": {
+    "totalCount": 4,
+    "nodes": [
+      {
+        "author": {
+          "login": "test-review-user"
+        },
+        "createdAt": "2000-01-01T01:01:01Z",
+        "body": "test-body",
+        "updatedAt": "2000-01-01T01:01:01Z",
+        "reactions": {
+          "nodes": [
+            {
+              "content": "test-content",
+              "createdAt": "2000-01-01T01:01:01Z",
+              "user": {
+                "login": "test-reaction-user"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "updatedAt": "2000-01-01T01:01:01Z"
+}
