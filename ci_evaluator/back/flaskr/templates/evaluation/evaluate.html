@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="project_h">{% block title %}Score the GitHub project{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <p>
+      Please provide a GitHub link to the projec to evaluate 
+      any GitHub project by it's latest PR(s)
+  </p>
+  {% if feedback %}
+  <p class="error-text">
+    {{ feedback }}
+  </p> 
+    <br>
+  {% endif %}
+  {% if re_errors %}
+  <p class="error-text">
+    {% if re_errors[1] == "NOT_FOUND" %}
+    <p class="error-text">
+      This PR could not be found, please choose another one.
+    </p> 
+    {% else %}
+    <p class="error-text">
+      Internal error occured, please try again later or choose another PR for evaluation.
+    </p> 
+    {% endif %}
+    <br>
+  </p>
+  {% endif %}
+  
+  {% if re_proj_errors %}
+  <p class="error-text">
+    {% if re_proj_errors[1] == "NOT_FOUND" %}
+    <p class="error-text">
+      This project could not be found, please choose another one.
+    </p> 
+    {% else %}
+    <p class="error-text">
+      Internal error occured, please try again later or choose another project for evaluation.
+    </p> 
+    {% endif %}
+    <br>
+  {% endif %}
+  </p>
+  <div class="evaluate_card">
+    <form action="{{ url_for('evaluation.pr_request') }}" method="post" id="pr_request" >
+      <div>
+        <label for="pr_link" class="input_lable">Please provide a GitHub link to the PR:</label>
+        <br> <br>
+      </div>
+      <div>
+        <input name="pr_link" id="link_pr" class="input_link"> <br>
+        <input type="submit" value="Evaluate PR" class="input_submit">
+      </div>
+    </form>
+  </div>
+
+    <br> <br>
+  <div class="evaluate_card">
+    <form action="{{ url_for('evaluation.project_request') }}" method="post" id="project_request_form" >
+      <div>
+        <label for="project_link" class="input_lable">Please provide a GitHub link to the project:</label><br>
+        <input name="project_link" id="link_project" class="input_link">
+        <br> <br>
+      </div>
+      <div>
+        <label for="project_year" class="input_lable">Please provide a calendar year to get the project 
+          evaluation for that particular year:</label> <br>
+          <input name="project_year" id="year_project" class="input_year"> <br>
+          <input type="submit" value="Evaluate Project" class="input_submit">
+      </div>
+    </form>
+  </div>
+{% endblock %}

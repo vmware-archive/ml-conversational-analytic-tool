@@ -1,0 +1,20 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - CIE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<nav>
+  <h1><a href="{{ url_for('index') }}">Constructiveness & Inclusiveness Evaluator</a></h1>
+  <ul>
+      <li><a href="{{ url_for('evaluation.evaluate') }}">Evaluate GitHub Project</a>
+      <li><a href="{{ url_for('cie_project.about') }}">About</a>
+      <li><a href="{{ url_for('evaluation.list_projects') }}">Evaluated Projects</a>
+  </ul>
+</nav>
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</section>

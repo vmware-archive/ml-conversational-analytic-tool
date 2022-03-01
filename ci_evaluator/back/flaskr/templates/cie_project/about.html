@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="project_h">{% block title %}About{% endblock %}</h1>
+  <a class="action" href="{{ url_for('cie_project.index') }}">back</a>
+{% endblock %}
+
+{% block content %}
+  <article >
+    <header>
+      <div>
+        <h1 class="about_project">About the CIE project</h1>
+        <p>Constructiveness & Inclusiveness Evaluator</p>
+      </div>
+    </header>
+    <p class="body">Whether we know it or not, 
+      Open Source software is an integral part of today’s 
+      technological development and everyone regularly uses its fruits  
+      across the globe. In an effort to contribute to the open source 
+      community, we have set out to address an unresolved an unresolved issue: 
+      how to properly assess the health of open source projects. 
+      <br><br>
+      We believe that a healthy project must be constructive and inclusive. 
+      The Constructiveness & Inclusiveness Evaluator (CIE) analyzes GitHub project's
+      pull requests (PR) and assigns a score to each PR. We are going to measure 
+      constructiveness and inclusiveness of each comment in the PR togather with other 
+      PR's metadata as was it merged, how long did it take to merge or close it, 
+      median response time for comment, etc. 
+      <br><br>
+      Based on evaluated PRs we are going to assign an overall score to the project. 
+      It is our hope that newcomers and experts, startups and corporations, 
+      small and large projects, use this tool to 
+      <ul>
+        <li>better navigate open source community, </li>
+        <li>popularize healthy projects,</li> 
+        <li>find inclusive projects to contribute to,</li>
+        <li>inform their decision-making process.</li>
+      </ul>
+    </p>
+  </article>
+  <hr>
+  <article>
+      <header>
+        <div>
+          <h1 class="about_project">About the team</h1>
+          <p>GOMY Bears Team and Sponsours</p>
+        </div>
+      </header>
+      <p class="body_sponsours">Project's amazing and extremely helpful <b>sponsors</b> are:
+        <ul>
+          <li>Malini Bhandaru</li>
+          <li>Anna Jung</li>
+        </ul> </p>
+      <p class="body_team">Team members: 
+          <ul class="a">
+              <li>Milton Carreno,</li>
+              <li>Yuan Qian,</li>
+              <li>Giulio Cappellani,</li>
+              <li>Olga Kondratenko.</li>
+          </ul>
+      </p>
+      <p class="body_prof">Faculty Advisor: Professor Doug Halperin</p>
+    </article>
+{% endblock %}
