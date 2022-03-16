@@ -184,7 +184,7 @@ Auto-generated API documentation can be found in
 Run the following command to update the API documentation
 
 ```python
-PYTHONPATH=./mcat pdoc --html --output-dir docs mcat
+tox -e docs
 ```
 
 ## Blog Posts
