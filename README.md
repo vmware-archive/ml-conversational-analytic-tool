@@ -105,7 +105,7 @@ Note: There is a rate limit associated with GitHub API. Please read more about
 before extracting data from a GitHub repo.
 
 ```
-export GITACCESS=<YOUR_TOKEN>
+export GH_TOKEN=<YOUR_TOKEN>
 ```
 
 Run the script by passing in `organization`

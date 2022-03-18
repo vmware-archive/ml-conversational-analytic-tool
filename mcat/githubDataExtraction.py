@@ -225,7 +225,7 @@ if __name__ == "__main__":
                         help='Output file name. If not specified, the name is constructed like this: <organization>_<repo>.csv')
 
     args = parser.parse_args()
-    ACCESS_TOKEN = os.environ["GITACCESS"]  # Access Github token from environment for security purposes
+    ACCESS_TOKEN = os.environ["GH_TOKEN"]  # Access Github token from environment for security purposes
     extractor = GithubDataExtractor(ACCESS_TOKEN, args.organization)
 
     if args.repo is None:
