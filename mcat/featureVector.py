@@ -17,6 +17,7 @@ class Featurizer:
         """
         Constructor sets instance variables
         Inputs: Retained Features (list) -> pull data features, Analysis Features (list) - > comment analysis features
+        Docs test
         """
         self.analysis_features = analysis_features
         self.retain_pull_features = retain_features
