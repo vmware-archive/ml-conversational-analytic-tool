@@ -14,6 +14,7 @@ class CommentAnalyzer:
         """
         Constructors form a dictionary to be used for counting.
         Parameters: words - list of words to count
+        Test docs
         """
         self.word_count = {word.lower(): 0 for word in words}  # Create dictionary with list items as key
         self.vader_sentiment = vader.SentimentIntensityAnalyzer()  # Initialize sentiment analysis model
