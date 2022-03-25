@@ -1,14 +1,12 @@
 name: docs-build
 on :
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - "mcat/*.py"
 
 jobs:
   docs-build:
-    name: Automatic docs build
+    name: Docs build
     runs-on: ubuntu-latest
     env:
       # see tox.ini
@@ -31,12 +29,20 @@ jobs:
       - name: Run tox (${{ env.TOXENV }})
         run: tox
 
-      - name: Commit docs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get git status
+        id: git_status
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@users.noreply.github.com'
-          git add -A
-          git commit -s -m "Build docs"
-          git push
+          if [ $(git status --porcelain) == "" ]; then
+            echo ::set-output name=uncommitted::false
+          else
+            echo ::set-output name=uncommitted::true
+          fi
+
+      - name: Check for uncommited docs
+        if: ${{steps.git_status.outputs.uncommitted}}
+        run: |
+          echo "Uncommitted docs found. Faliing the job."
+          exit 1
+          
+
+          
