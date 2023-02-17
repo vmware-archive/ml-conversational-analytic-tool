@@ -1,3 +1,5 @@
+**VMware has ended active development of this project, this repository will no longer be updated.**
+
 # ML Conversational Analytic Tool
 
 The ML Conversational Analytic Tool is a **proof of concept (POC)** machine learning framework to automatically assess
