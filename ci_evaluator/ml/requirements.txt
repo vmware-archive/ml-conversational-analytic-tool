@@ -38,7 +38,7 @@ threadpoolctl==3.0.0
 tomli==1.2.2
 tqdm==4.62.3
 urllib3==1.26.7
-Werkzeug==2.0.2
+Werkzeug==2.2.3
 xxhash==2.0.2
 tablib==3.1.0
 tablib[html]==3.1.0
